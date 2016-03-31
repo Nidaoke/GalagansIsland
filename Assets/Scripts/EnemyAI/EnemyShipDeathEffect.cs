@@ -13,23 +13,33 @@ public class EnemyShipDeathEffect : MonoBehaviour
 		{
 			GetComponent<AudioSource>().volume = GetComponent<AudioSource>().volume * (1f - (Application.loadedLevel/50f));
 		}
+
+		StartCoroutine(DeathTimer());
 	}//END of Start()
-	
-	// Update is called once per frame
-	void Update () 
+
+
+	//More efficient than using a timer on Update() ~Adam
+	IEnumerator DeathTimer()
 	{
+		yield return new WaitForSeconds(mDeathTimer);
+		Destroy(this.gameObject);
+	}
 
-
-
-
-		//Decrement Timer ~Adam
-		mDeathTimer -= Time.deltaTime;
-
-
-		//Destroy object if timer has run out ~Adam
-		if(mDeathTimer <= 0f)
-		{
-			Destroy(this.gameObject);
-		}
-	}//END of Update()
+//	// Update is called once per frame
+//	void Update () 
+//	{
+//
+//
+//
+//
+//		//Decrement Timer ~Adam
+//		mDeathTimer -= Time.deltaTime;
+//
+//
+//		//Destroy object if timer has run out ~Adam
+//		if(mDeathTimer <= 0f)
+//		{
+//			Destroy(this.gameObject);
+//		}
+//	}//END of Update()
 }

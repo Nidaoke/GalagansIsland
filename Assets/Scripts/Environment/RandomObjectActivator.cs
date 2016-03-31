@@ -27,7 +27,7 @@ public class RandomObjectActivator : MonoBehaviour
 
 	IEnumerator ActivateRandom()
 	{
-		mTargetRandomObject = Random.Range(0,mRandomObjects.Length);
+		mTargetRandomObject = Mathf.FloorToInt(Random.Range(0,mRandomObjects.Length));
 		mRandomObjects[mTargetRandomObject].SetActive(true);
 		yield return new WaitForSeconds(mActiveTime);
 		StartCoroutine(DeactivateTarget());
