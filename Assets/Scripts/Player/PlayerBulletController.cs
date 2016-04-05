@@ -11,7 +11,7 @@ public class PlayerBulletController : MonoBehaviour
 
 	public void Start()
 	{
-		bulletSpeed+= (30f/25f*17f);
+		bulletSpeed+= (30f/25f*17f);//Speed used to scale with the level number, but we set the speed to be statically at what it used to be at level 17 ~Adam
 		//bulletSpeed+= (30f/25f*Application.loadedLevel);
 		Vector3 bulletForce;
 		bulletForce = new Vector3(0.0f,bulletSpeed, 0f);
@@ -33,7 +33,7 @@ public class PlayerBulletController : MonoBehaviour
 	{
 
 
-		//For Ludum Dare Metagalactic Monstrosities build
+		//For Ludum Dare Metagalactic Monstrosities build ~Adam
 		if(other.gameObject.GetComponent<LDBossWeakPoint>() != null)
 		{
 
@@ -43,7 +43,7 @@ public class PlayerBulletController : MonoBehaviour
 	}
 
 
-	//For getting hit by boss beams ~Adam
+	//For getting hit by original prototype boss beams ~Adam
 //	void OnParticleCollision(GameObject other)
 //	{
 //		Debug.Log("The bullet hit a by a particle");
