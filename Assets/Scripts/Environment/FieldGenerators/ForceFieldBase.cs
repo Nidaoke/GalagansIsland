@@ -12,20 +12,42 @@ public class ForceFieldBase : MonoBehaviour
 	[SerializeField] protected float mAutoToggleOffInterval = 5f;
 	[SerializeField] protected float mAutoToggleOnInterval = 10f;
 
-	[SerializeField] protected bool mDelayedStart = false;
-	[SerializeField] protected float mStartDelayTime = 8f;
+	//Have two collider components, one for bouncing things off with physics, and one for things passing through ~Adam
+		//Currently the BulletReflectionField makes uses of both at once for different things ~Adam
 	[SerializeField] protected Collider mTriggerCollider;
 	[SerializeField] protected Collider mCollisionCollider;
 
 
+	[SerializeField] protected SpriteRenderer mFieldGraphic;
+	[SerializeField] protected Animator mAnimator;
+
 	// Use this for initialization
 	protected virtual void Start () 
 	{
-		
-		if(mCurrentState == ForceFieldState.ACTIVATING)
+		if(mAnimator != null)
 		{
-			TurnOn();
+			mAnimator.enabled = true;
 		}
+		switch (mCurrentState)
+		{
+		case ForceFieldState.ACTIVATING:
+			TurnOn();
+			break;
+		case ForceFieldState.DEACTIVATING:
+			TurnOff();
+			break;
+		case ForceFieldState.ON:
+			TurnOn();
+			break;
+		case ForceFieldState.OFF:
+			HideGraphic();
+			TurnOff();
+			break;
+			default:
+			break;
+		}
+
+
 		if(mAutoToggle)
 		{
 			if(mCurrentState == ForceFieldState.ACTIVATING || mCurrentState == ForceFieldState.ON)
@@ -38,7 +60,7 @@ public class ForceFieldBase : MonoBehaviour
 			}
 		}
 
-	}
+	}//END of Start()
 
 
 
@@ -48,39 +70,64 @@ public class ForceFieldBase : MonoBehaviour
 	protected virtual void Update () 
 	{
 	
-	}
+	}//END of Update()
 
 	public virtual void TurnOn()
 	{
 		//Play an animation to turn on, at the end of which SetForceFieldState() is called ~Adam
-		//For now we'll just call it directly until we have art ~Adam
-		SetForceFieldState(ForceFieldState.ON);
-	}
+		if(mAnimator != null)
+		{
+			mFieldGraphic.enabled = true;
+			SetForceFieldState(ForceFieldState.ACTIVATING);
+			//mAnimator.Play("ForceFieldActivate");
+			mAnimator.SetInteger("ActivationState",1);
+		}
+		//If we're missing an animation, just turn it on directly ~Adam
+		else
+		{
+			mFieldGraphic.enabled = true;
+			SetForceFieldState(ForceFieldState.ON);
+		}
+	}//END of TurnOn()
 
 	public virtual void TurnOff()
 	{
 		//Play an animation to turn off, at the end of which SetForceFieldState() is called ~Adam
-		//For now we'll just call it directly until we have art ~Adam
-		SetForceFieldState(ForceFieldState.OFF);
-	}
+		if(mAnimator != null)
+		{
+			SetForceFieldState(ForceFieldState.DEACTIVATING);
+			mAnimator.SetInteger("ActivationState",-1);
+		}
+		//If we're missing an animation, just turn it off directly ~Adam
+		else
+		{
+			SetForceFieldState(ForceFieldState.OFF);
+		}
+	}//END of TurnOff()
 
+	public virtual void HideGraphic()
+	{
+		mFieldGraphic.enabled = false;
+	}//END of HideGraphic()
+
+	//This is primarily for changing state at the end of an animation ~Adam
 	public virtual void SetForceFieldState(ForceFieldState newState)
 	{
 		mCurrentState = newState;
-	}
+	}//END of SetForceFieldState()
 
 	protected virtual IEnumerator AutoToggleOn()
 	{
 		TurnOn();
 		yield return new WaitForSeconds(mAutoToggleOnInterval);
 		StartCoroutine(AutoToggleOff());
-	}
+	}//END of AutoToggleOn()
 	protected virtual IEnumerator AutoToggleOff()
 	{
 		TurnOff();
 		yield return new WaitForSeconds(mAutoToggleOffInterval);
 		StartCoroutine(AutoToggleOn());
-	}
+	}//END of AutoToggleOff()
 
 
 	protected virtual void OnTriggerEnter(Collider other)

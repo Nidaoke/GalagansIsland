@@ -104,4 +104,14 @@ public class ShieldKiller : MonoBehaviour
 			mMoveTarget = new Vector3(Random.Range (mBounds[0],mBounds[1]), Random.Range (mBounds[2],mBounds[3]),mZPos);
 		}
 	}//END of BowMovement()
+
+	//For accessing the timer from other scripts to manipulate the current state of the beams ~Adam
+	public float GetTimer()
+	{
+		return mTimer;
+	}//END of GetTimer()
+	public void SetTimer(float newTime)
+	{
+		mTimer = newTime;
+	}//END of SetTimer()
 }

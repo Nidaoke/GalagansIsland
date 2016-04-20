@@ -181,5 +181,18 @@ public class SwarmGrid : MonoBehaviour
 	public int GetFormationNumber()
 	{
 		return mFormationUsed;
+	}//END of GetFormationNumber()
+
+	public bool CheckIfSwarmEmpty()
+	{
+		bool swarmEmpty = true;
+		foreach (SwarmGridSlot slot in mGridSlots)
+		{
+			if(slot.mOccupied)
+			{
+				swarmEmpty = false;
+			}
+		}
+		return swarmEmpty;
 	}
 }
