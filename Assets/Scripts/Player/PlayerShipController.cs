@@ -1217,4 +1217,14 @@ public class PlayerShipController : MonoBehaviour
 	}
 	#endregion
 
+	#region For accessing the max drop speed from elsewhere.  Original made for use in the sidescroller level ~Adam
+	public float GetMaxDropSpeed()
+	{
+		return mMaxDropSpeed;
+	}//END of GetMaxDropSpeed()
+	public void SetMaxDropSpeed(float maxDrop)
+	{
+		mMaxDropSpeed = maxDrop;
+	}//END of SetMaxDropSpeed()
+	#endregion
 }//END of MonoBehavior

@@ -23,12 +23,20 @@ public class ShieldKiller : MonoBehaviour
 
 	[SerializeField] GameObject mCore;
 	[SerializeField] GameObject mBeam;
-
+	[SerializeField] private bool mStartRotationRandom = false;
 
 	// Use this for initialization
 	void Start () 
 	{
 		mMoveTarget = transform.position;
+		if(mStartRotationRandom)
+		{
+			transform.localRotation = Quaternion.Euler (new Vector3(0,0, Random.Range (0,360)));
+			if(Random.Range (-1f,1f) <0f)
+			{
+				mSpinSpeed *= -1f;
+			}
+		}
 	}
 	
 	// Update is called once per frame

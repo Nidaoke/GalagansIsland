@@ -102,11 +102,11 @@ public class BKG : MonoBehaviour
 			}
 			if(mPlayerMoveDirection.y >= 0f)
 			{
-				mRenderOffest += (Time.deltaTime * m_fSpeed) + (Time.deltaTime*m_fSpeed*mPlayerMoveDirection.y/15f) ;
+				mRenderOffest += (Time.deltaTime * m_fSpeed) + (Time.deltaTime*m_fSpeed*mPlayerMoveDirection.y) ;
 			}
 			else
 			{
-				mRenderOffest += (Time.deltaTime * m_fSpeed) + (Time.deltaTime*m_fSpeed*mPlayerMoveDirection.y*1.5f) ;
+				mRenderOffest += (Time.deltaTime * m_fSpeed) + (Time.deltaTime*m_fSpeed*mPlayerMoveDirection.y*-0.1f) ;
 			}
 
 			GetComponent<Renderer>().material.SetTextureOffset("_MainTex", new Vector2(0, mRenderOffest));
