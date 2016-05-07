@@ -62,6 +62,9 @@ public class SideScrollFlipper : MonoBehaviour
 				FlipToSide(mPlayer1.transform, 90f, false);
 				FlipToSide(mPlayer1.mMainShip.transform, 0f,true);
 				mPlayer1.SetMaxDropSpeed(0f);
+				FlipToSide(mPlayer1.mLaserFist.transform, 0f,true);
+				mPlayer1.mLaserFist.transform.localPosition = new Vector3(-4f,0f,-1f);
+				FlipToSide(mPlayer1.mBigBlast.transform, 0f,true);
 
 				if (mPlayer1.mMoveDir.x > 0.2f && !(mPlayer1.secondShipOnHip&&mPlayer1.mShipRecovered) ) 
 				{
@@ -108,10 +111,12 @@ public class SideScrollFlipper : MonoBehaviour
 			}
 			if(mPlayer2 != null && mPlayer2.mSpinTimer <=0f)
 			{
-				FlipToSide(mPlayer2.transform, 270f,true);
-				mPlayer2.isHovering = true;
+				FlipToSide(mPlayer2.transform, 90f, false);
+				FlipToSide(mPlayer2.mMainShip.transform, 0f,true);
 				mPlayer2.SetMaxDropSpeed(0f);
-
+				FlipToSide(mPlayer2.mLaserFist.transform, 0f,true);
+				mPlayer2.mLaserFist.transform.localPosition = new Vector3(-4f,0f,-1f);
+				FlipToSide(mPlayer2.mBigBlast.transform, 0f,true);
 			}
 
 			//Going back upright ~Adam
@@ -135,6 +140,10 @@ public class SideScrollFlipper : MonoBehaviour
 			{
 				FlipToSide(mPlayer1.transform, 0f, true);
 				FlipToSide(mPlayer1.mMainShip.transform, 0f,false);
+				FlipToSide(mPlayer1.mLaserFist.transform, 0f,false);
+				mPlayer1.mLaserFist.transform.localPosition = new Vector3(0f,-4f,-1f);
+				FlipToSide(mPlayer1.mBigBlast.transform, 0f,false);
+
 
 				if(mPlayer1.secondShipOnHip)
 				{
@@ -149,6 +158,9 @@ public class SideScrollFlipper : MonoBehaviour
 			if(mPlayer2 != null && mPlayer2.mSpinTimer <=0f)
 			{
 				FlipToSide(mPlayer2.transform, 0f,false);
+				FlipToSide(mPlayer2.mLaserFist.transform, 0f,false);
+				mPlayer2.mLaserFist.transform.localPosition = new Vector3(0f,-4f,-1f);
+				FlipToSide(mPlayer2.mBigBlast.transform, 0f,false);
 			}
 		}
 	}//END of Update()
