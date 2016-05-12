@@ -138,7 +138,7 @@ public class EnemyShipAI : MonoBehaviour
 	// Use this for initialization
 	void Start () 
 	{
-		GetComponent<Animator> ().logWarnings = false;
+
 
 		if (mLimitedAutoFire) 
 		{

@@ -138,10 +138,6 @@ public class PlayerShipController : MonoBehaviour
 
 	//For toggling the ability to hover externally ~Adam
 	protected bool mHoverDisabled;
-	[SerializeField] protected float[] mBounds = new float[4];
-
-	//The X and Y bounds of the part of the screen the ship can move on ~Adam
-
 
 	// Use this for initialization
 	protected virtual void Start () 
@@ -662,31 +658,31 @@ public class PlayerShipController : MonoBehaviour
 	protected virtual void LateUpdate () 
 	{
 		//Keep ship within screen bounds ~Adam
-		if (transform.position.x < mBounds[0]+3.5 && mShipRecovered && secondShipOnHip)// && Application.isMobilePlatform) (from when we were doing twin-stick
+		if (transform.position.x < -23.5 && mShipRecovered && secondShipOnHip)// && Application.isMobilePlatform) (from when we were doing twin-stick
 		{
-			transform.position = new Vector3(mBounds[0]+3.5f, transform.position.y, transform.position.z);
+			transform.position = new Vector3(-23.5f, transform.position.y, transform.position.z);
 		}																							//Second ship is in new position now ~ Jonathan
-		else if(transform.position.x < mBounds[0])
+		else if(transform.position.x < -27f)
 		{
-			transform.position = new Vector3(mBounds[0], transform.position.y, transform.position.z);
+			transform.position = new Vector3(-27f, transform.position.y, transform.position.z);
 		}
-		if (transform.position.x > mBounds[1])
+		if (transform.position.x > 27f)
 		{
-			transform.position = new Vector3(mBounds[1], transform.position.y, transform.position.z);
+			transform.position = new Vector3(27f, transform.position.y, transform.position.z);
 		}
-		if (transform.position.y < mBounds[2]+3.5 && mShipRecovered && !secondShipOnHip) { //Original is -33, but there is a new second ship position now ~ Jonathan
-			transform.position = new Vector3 (transform.position.x, mBounds[2]+3.5f, transform.position.z);
+		if (transform.position.y < -29.5f && mShipRecovered && !secondShipOnHip) { //Original is -33, but there is a new second ship position now ~ Jonathan
+			transform.position = new Vector3 (transform.position.x, -29.5f, transform.position.z);
 			isOnBottomY = true;
-		} else if (transform.position.y < mBounds[2]) {
+		} else if (transform.position.y < -33f) {
 			isOnBottomY = true;
-			transform.position = new Vector3 (transform.position.x, mBounds[2], transform.position.z);
+			transform.position = new Vector3 (transform.position.x, -33f, transform.position.z);
 		} else {
 
 			isOnBottomY = false;
 		}
-		if (transform.position.y > mBounds[3])
+		if (transform.position.y > 23f)
 		{
-			transform.position = new Vector3(transform.position.x, mBounds[3], transform.position.z);
+			transform.position = new Vector3(transform.position.x, 23, transform.position.z);
 		}
 		
 		if(mThreeBulletTimer <= 0f)
@@ -1219,31 +1215,6 @@ public class PlayerShipController : MonoBehaviour
 		yield return new WaitForSeconds(disableTime);
 		mHoverDisabled = false;
 	}
-	#endregion
-
-	#region For accessing the max drop speed from elsewhere.  Original made for use in the sidescroller level ~Adam
-	public float GetMaxDropSpeed()
-	{
-		return mMaxDropSpeed;
-	}//END of GetMaxDropSpeed()
-	public void SetMaxDropSpeed(float maxDrop)
-	{
-		mMaxDropSpeed = maxDrop;
-	}//END of SetMaxDropSpeed()
-	#endregion
-
-	#region For accessing the ship's bounds from elsewhere.  Original made for use in the turn-based level ~Adam
-	public float[] GetShipBounds()
-	{
-		return mBounds;
-	}//END of GetShipBounds()
-	public void SetShipBounds(float[] newBounds)
-	{
-		if(newBounds.Length == 4)
-		{
-			mBounds = newBounds;
-		}
-	}//END of SetShipBounds()
 	#endregion
 
 }//END of MonoBehavior

@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using Steamworks;
-//using ManagedSteam;
+using ManagedSteam;
 
 namespace Assets.Scripts.Achievements
 {
@@ -20,7 +19,7 @@ namespace Assets.Scripts.Achievements
         public List<AchievementBase> AchievementList;
 
         //Level Dependent Achievements
-		public int currentLevel = -1;
+        private int currentLevel = -1;
         [SerializeField] private int livesBeforeBoss;
         private ScoreManager scoreManager;
 
@@ -58,9 +57,8 @@ namespace Assets.Scripts.Achievements
 
         void Start()
         {
-			if(PlayerPrefs.GetInt ("HasPlayedWithAchievements") != 23)
+			if(PlayerPrefs.GetInt ("HasPlayedWithAchievements") != 42)
 			{
-				Debug.Log("Reseting PlayerPrefs!");
 				int highScore = PlayerPrefs.GetInt ("highscore");
 				float bgm = PlayerPrefs.GetFloat("BGMVolume");
 				float sfx = PlayerPrefs.GetFloat("SFXVolume");
@@ -68,26 +66,7 @@ namespace Assets.Scripts.Achievements
 				PlayerPrefs.SetInt ("highscore", highScore);
 				PlayerPrefs.SetFloat ("BGMVolume", bgm);
 				PlayerPrefs.SetFloat ("SFXVolume", sfx);
-
-				RepairShip100Times.ResetValue();
-				UpgradeWeapons100Times.ResetValue();
-				UpgradeSpeed100Times.ResetValue();
-				UpgradeOnlyWeapons.ResetValue();
-				UpgradeOnlySpeed.ResetValue();
-
-				KillCounter1.ResetValue();
-				KillCounter2.ResetValue();
-				KillCounter3.ResetValue();
-				KillCounter4.ResetValue();
-				KillCounter5.ResetValue();
-
-				BackStab.ResetValue();
-				FriendOMine.ResetValue();
-				UpgradesCollected.ResetValue();
-				IDontCare.ResetValue();
-
-				Debug.Log("PlayerPrefs Reset!");
-				PlayerPrefs.SetInt ("HasPlayedWithAchievements", 23);
+				PlayerPrefs.SetInt ("HasPlayedWithAchievements", 42);
 			}
             LoadAchievements();
         }
@@ -97,7 +76,7 @@ namespace Assets.Scripts.Achievements
             HandleLevelAchievements();
         }
 
-        /*private bool IsAchievementUnlocked(string achievementID)
+        private bool IsAchievementUnlocked(string achievementID)
         {
             foreach (var achiv in AchievementList)
             {
@@ -106,8 +85,8 @@ namespace Assets.Scripts.Achievements
                     return achiv.IsUnlocked;
                 }
             }
-            
-        }*/
+            return true;
+        }
 
         private void SetAchievementAsUnlocked(string achievementID)
         {
@@ -128,7 +107,7 @@ namespace Assets.Scripts.Achievements
             foreach (var achiv in AchievementList)
             {
                 if (PlayerPrefs.HasKey("ACHIV_" + achiv.AchievementSteamID))
-				{
+                {
                     achiv.IsUnlocked = true;
                 }
                 else
@@ -140,35 +119,19 @@ namespace Assets.Scripts.Achievements
 
         public void PostAchievement(string achievementID)
         {
-			Debug.Log ("PA has been called" + achievementID);
-
-			foreach (var achiv in AchievementList)
-			{
-				if (achiv.AchievementSteamID == achievementID) {
-					Debug.Log ("FOIUND IT!");
-
-					if (achiv.IsUnlocked) {
-
-						Debug.Log ("Achievement Unloacked alrady");
-					} else {
-
-						Debug.Log ("Achievement " + achievementID + " has been Unlocked!");
-						try {
-							//Steamworks.SteamInterface.Stats.SetAchievement(achievementID);
-
-							SteamUserStats.SetAchievement (achievementID);
-						} catch (Exception e) {
-							Debug.LogError ("Count not sand Achievement to Steam: " + e.Message);
-						}
-						SetAchievementAsUnlocked (achievementID);
-					}
-				} else {
-
-					//Debug.Log ("Found " + achiv.AchievementSteamID + ", not " + achievementID);
-				}
-			}
-
-
+            if (IsAchievementUnlocked(achievementID) == false)
+            {
+                Debug.Log("Achievement " + achievementID + " has been Unlocked!");
+                try
+                {
+                    Steamworks.SteamInterface.Stats.SetAchievement(achievementID);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Count not sand Achievement to Steam: " + e.Message);
+                }
+                SetAchievementAsUnlocked(achievementID);
+            }
         }
 
         private void HandleLevelAchievements()
@@ -190,12 +153,9 @@ namespace Assets.Scripts.Achievements
 					case 1:
 						numberOfOverheats = 0;
 						break;
-				case 2:
-
-					Debug.Log ("SecondLevel");
+                    case 2:
                         if (scoreManager.mLivesRemaining == 100)
                         {
-						Debug.Log ("100 Lives Left!");
                             PostAchievement("CantTouchThis"); // No lifes lost till lvl 1.
                         }
                         break;

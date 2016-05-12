@@ -23,20 +23,12 @@ public class ShieldKiller : MonoBehaviour
 
 	[SerializeField] GameObject mCore;
 	[SerializeField] GameObject mBeam;
-	[SerializeField] private bool mStartRotationRandom = false;
+
 
 	// Use this for initialization
 	void Start () 
 	{
 		mMoveTarget = transform.position;
-		if(mStartRotationRandom)
-		{
-			transform.localRotation = Quaternion.Euler (new Vector3(0,0, Random.Range (0,360)));
-			if(Random.Range (-1f,1f) <0f)
-			{
-				mSpinSpeed *= -1f;
-			}
-		}
 	}
 	
 	// Update is called once per frame
@@ -112,14 +104,4 @@ public class ShieldKiller : MonoBehaviour
 			mMoveTarget = new Vector3(Random.Range (mBounds[0],mBounds[1]), Random.Range (mBounds[2],mBounds[3]),mZPos);
 		}
 	}//END of BowMovement()
-
-	//For accessing the timer from other scripts to manipulate the current state of the beams ~Adam
-	public float GetTimer()
-	{
-		return mTimer;
-	}//END of GetTimer()
-	public void SetTimer(float newTime)
-	{
-		mTimer = newTime;
-	}//END of SetTimer()
 }

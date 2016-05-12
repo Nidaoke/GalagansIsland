@@ -41,7 +41,6 @@ public class TutorialTargetBox : MonoBehaviour
 	//Get cleared on Enter if not requiring hover ~Adam
 	void OnTriggerEnter(Collider other)
 	{
-		Debug.Log(other.gameObject.name + "Entered the tut trigger");
 		if(other.GetComponent<PlayerShipController>() != null && !mRequiresHover)
 		{
 			mCleared = true;

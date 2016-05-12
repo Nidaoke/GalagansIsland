@@ -15,8 +15,6 @@ public class FollowAndSmash : MonoBehaviour
 	[SerializeField] private float mDropTime = 5f;
 	[SerializeField] private float mSpeed = 5f;
 	[SerializeField] private float mStartDelayTime = 0f;
-	[SerializeField] private float mHangHeight = 0f;
-	[SerializeField] private float mDropHeight = -25f;
 	// Use this for initialization
 	void Start () 
 	{
@@ -51,14 +49,11 @@ public class FollowAndSmash : MonoBehaviour
 		{
 		case TrackingState.FOLLOW:
 		case TrackingState.HANG:
-			transform.Translate(Vector3.Normalize(new Vector3(mTargetPos.x, mHangHeight,transform.position.z) - transform.position)*mSpeed*Time.deltaTime);
+			transform.Translate(Vector3.Normalize(new Vector3(mTargetPos.x, 0f,transform.position.z) - transform.position)*mSpeed*Time.deltaTime);
 //			transform.position = Vector3.Lerp(transform.position, new Vector3(mTargetPos.x, 0f,transform.position.z), mSpeed*Time.deltaTime);
 			break;
 		case TrackingState.DROP:
-			if(transform.position.y > mDropHeight)
-			{
-				transform.Translate(Vector3.Normalize(new Vector3(mTargetPos.x, mDropHeight,transform.position.z) - transform.position)*mSpeed*10f*Time.deltaTime);
-			}
+			transform.Translate(Vector3.Normalize(new Vector3(mTargetPos.x, -25f,transform.position.z) - transform.position)*mSpeed*10f*Time.deltaTime);
 		//	transform.position = Vector3.Lerp(transform.position, new Vector3(mTargetPos.x, -25f,transform.position.z), mSpeed*5f*Time.deltaTime);
 			break;
 		default:
@@ -94,6 +89,7 @@ public class FollowAndSmash : MonoBehaviour
 	//Keeps TrackingLoop() from calling itself directly, which seems like a terrible idea ~Adam
 	void StartTrackingLoop()
 	{
+		Debug.Log("New loop started");
 		StartCoroutine(TrackingLoop());
 	}//END of StartTrackingLoop()
 

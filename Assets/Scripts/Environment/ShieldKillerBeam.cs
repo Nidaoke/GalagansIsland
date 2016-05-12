@@ -10,10 +10,9 @@ public class ShieldKillerBeam : MonoBehaviour
 	//Remove shield on a hit ~Adam
 	void OnTriggerEnter(Collider other)
 	{
-		PlayerShipController playerShip = other.GetComponent<PlayerShipController>();
-		if(playerShip != null)
+		if(other.gameObject.GetComponent<PlayerShipController>() != null)
 		{
-			playerShip.mShieldTimer = 0f;
+			other.gameObject.GetComponent<PlayerShipController>().mShieldTimer = 0f;
 			if(FindObjectOfType<ScoreManager>() != null)
 			{
 				FindObjectOfType<ScoreManager>().HitAPlayer (other.gameObject);
@@ -25,10 +24,9 @@ public class ShieldKillerBeam : MonoBehaviour
 
 	void OnTriggerStay(Collider other)
 	{
-		PlayerShipController playerShip = other.GetComponent<PlayerShipController>();
-		if(playerShip != null)
+		if(other.gameObject.GetComponent<PlayerShipController>() != null)
 		{
-			playerShip.mShieldTimer = 0f;
+			other.gameObject.GetComponent<PlayerShipController>().mShieldTimer = 0f;
 			if(FindObjectOfType<ScoreManager>() != null)
 			{
 				FindObjectOfType<ScoreManager>().HitAPlayer (other.gameObject);

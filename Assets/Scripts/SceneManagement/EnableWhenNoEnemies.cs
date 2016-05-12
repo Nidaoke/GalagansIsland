@@ -5,8 +5,6 @@ public class EnableWhenNoEnemies : MonoBehaviour
 {
 	[SerializeField] private float mCheckInterval = 3f;
 	[SerializeField] GameObject[] mObjectsToEnable;
-	[SerializeField] GameObject[] mObjectsToDisable;
-	[SerializeField] bool mDisableObjects = false;
 	int mEnableCount = 0;
 	[SerializeField] private LevelKillCounter mKillCounter;
 
@@ -33,11 +31,6 @@ public class EnableWhenNoEnemies : MonoBehaviour
 			if(mEnableCount < mObjectsToEnable.Length)
 			{
 				mObjectsToEnable[mEnableCount].SetActive(true);
-
-				if(mDisableObjects && mObjectsToDisable.Length> mEnableCount)
-				{
-					mObjectsToDisable[mEnableCount].SetActive(false);
-				}
 				mEnableCount++;
 			}
 		}

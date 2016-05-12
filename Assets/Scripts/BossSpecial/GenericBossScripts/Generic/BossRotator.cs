@@ -18,8 +18,6 @@ public class BossRotator : MonoBehaviour
 	public bool mAutoRotate = false;
 	public bool mDisconnect = false;
 	Transform mDisParent;
-
-	private ScoreManager mScoreMan;
 	// Use this for initialization
 	void Start () 
 	{
@@ -28,7 +26,6 @@ public class BossRotator : MonoBehaviour
 			mDisParent = transform.parent.transform;
 			transform.parent = null;
 		}
-		StartCoroutine(FindScoreMan());
 	}//END of Start()
 	
 	// Update is called once per frame
@@ -45,23 +42,11 @@ public class BossRotator : MonoBehaviour
 			//Spin on its own towards the player ~Adam
 			if(!mAutoRotate)
 			{
-				if(mBossCentral != null && mBossCentral.mTargetedPlayer != null)
+				if(mBossCentral.mTargetedPlayer != null)
 				{
 					mTargetPlayerPosition = mBossCentral.mTargetedPlayer.transform.position;
 					mTargetRotation = new Vector3(mTargetPlayerPosition.x-transform.position.x,mTargetPlayerPosition.y-transform.position.y,0f);
 					//mTargetRotation += Vector3.up*3f;
-				}
-				else if(mScoreMan != null)
-				{
-					if(mScoreMan.mP1Score >= mScoreMan.mP2Score-2)
-					{
-						mTargetPlayerPosition = mScoreMan.mPlayerAvatar.transform.position;
-					}
-					else
-					{
-						mTargetPlayerPosition = mScoreMan.mPlayer2Avatar.transform.position;
-					}
-					mTargetRotation = new Vector3(mTargetPlayerPosition.x-transform.position.x,mTargetPlayerPosition.y-transform.position.y,0f);
 				}
 
 				Vector3.Normalize (mTargetRotation);
@@ -89,11 +74,6 @@ public class BossRotator : MonoBehaviour
 		}
 	}//END of Update()
 
-	IEnumerator FindScoreMan()
-	{
-		yield return new WaitForSeconds(0.1f);
-		mScoreMan = FindObjectOfType<ScoreManager>();
 
-	}
 
 }
