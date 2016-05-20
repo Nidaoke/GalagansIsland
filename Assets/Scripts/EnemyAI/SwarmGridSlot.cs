@@ -7,10 +7,9 @@ public class SwarmGridSlot : MonoBehaviour
 
 	public Transform mFormationPosition;
 
-	// Use this for initialization
-	void Start () 
-	{
-	}
+	EnemyShipAI mOccupier;
+
+	[SerializeField] private float mPatternShootAngle = 0f;
 	
 	// Update is called once per frame
 	void Update () 
@@ -29,5 +28,29 @@ public class SwarmGridSlot : MonoBehaviour
 
 		}
 
+	}
+
+	public void SetOccupier(EnemyShipAI newShip)
+	{
+		mOccupier = newShip;
+		mOccupied = true;
+	}
+
+	public void ClearOccupation()
+	{
+		mOccupier = null;
+		mOccupied = false;
+	}
+
+	public void PatternShoot()
+	{
+		if(mOccupied && mOccupier != null)
+		{
+			//Have the mOccupier shoot in a fixed direction ~Adam
+			if(mOccupier.mCurrentAIState == EnemyShipAI.AIState.Swarming)
+			{
+				mOccupier.ShootPatternBullet(mPatternShootAngle);
+			}
+		}
 	}
 }

@@ -68,7 +68,7 @@ public class PlayerTwoShipController : PlayerShipController
 	protected override void Update () 
 	{
         //Achievements
-        if (Application.loadedLevel == 32 && AchievementManager.instance != null)
+		if (Application.loadedLevelName == "Credits" && AchievementManager.instance != null)
         {
             AchievementManager.instance.PostAchievement("TeamWork");
         }

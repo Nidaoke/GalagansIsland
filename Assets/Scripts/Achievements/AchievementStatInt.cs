@@ -11,16 +11,21 @@ namespace Assets.Scripts.Achievements
         [Tooltip("Value that is required to unlock Achievement")]
         public int ValueToUnlock;
 
-        private int currentValue;
+		[SerializeField] private int currentValue;
 
         void Start()
         {
+			currentValue = 0;
             if (IsConstant)
             {
                 if (PlayerPrefs.HasKey("STAT_" + AssosiatedAchievementId))
                 {
                     currentValue = PlayerPrefs.GetInt("STAT_" + AssosiatedAchievementId);
                 }
+				else 
+				{
+					currentValue = 0;
+				}
             }
         }
 

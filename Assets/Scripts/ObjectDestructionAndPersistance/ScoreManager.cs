@@ -266,29 +266,36 @@ public class ScoreManager : MonoBehaviour
 		}
 
 		//Say what shows up in the UI box for the level name ~Adam
-		switch(Application.loadedLevelName)
+		//Say "Skipper's Garage" if a RepairStation is in the scene ~Adam
+		if(GameObject.Find("RepairStation") != null)
 		{
-		case "Level26_Boss":
-			mLevelInfoText.text = "Game Over";
-			break;
-		case "Credits":
-			mLevelInfoText.text = "Thank you for playing!";
-			break;
-		case "EndGame":
-			mLevelInfoText.text = "Game Over";
-			break;
-		default:
-			if(mLevelNames.Length > Application.loadedLevel && mLevelNames[Application.loadedLevel].Contains("Boss"))
-			{
-				mLevelInfoText.text = mLevelNames[Application.loadedLevel];
-			}
-			else if (mLevelNames.Length > Application.loadedLevel)
-			{
-				mLevelInfoText.text = "Level "+ (Application.loadedLevel-Application.loadedLevel/6) + ":\n" + mLevelNames[Application.loadedLevel];
-			}
-			break;
+			mLevelInfoText.text = "Skipper's Garage";
 		}
-
+		else
+		{	
+			switch(Application.loadedLevelName)
+			{
+			case "Level26_Boss":
+				mLevelInfoText.text = "Game Over";
+				break;
+			case "Credits":
+				mLevelInfoText.text = "Thank you for playing!";
+				break;
+			case "EndGame":
+				mLevelInfoText.text = "Game Over";
+				break;
+			default:
+				if(mLevelNames.Length > Application.loadedLevel && mLevelNames[Application.loadedLevel].Contains("Boss"))
+				{
+					mLevelInfoText.text = mLevelNames[Application.loadedLevel];
+				}
+				else if (mLevelNames.Length > Application.loadedLevel)
+				{
+					mLevelInfoText.text = "Level "+ (Application.loadedLevel-Application.loadedLevel/6) + ":\n" + mLevelNames[Application.loadedLevel];
+				}
+				break;
+			}
+		}
 
 		//Display High Score ~Adam
 		mHighScoreText.text = "High Score:\n" + PlayerPrefs.GetInt("highscore", 0);

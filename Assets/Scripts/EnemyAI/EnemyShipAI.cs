@@ -134,11 +134,12 @@ public class EnemyShipAI : MonoBehaviour
 
 	//For determining which player killed this enemy ~Adam
 	[HideInInspector] public int mKillerNumber = 0;
+	public bool mDestroyedByBombs = true;
 
 	// Use this for initialization
 	void Start () 
 	{
-
+		GetComponent<Animator> ().logWarnings = false;
 
 		if (mLimitedAutoFire) 
 		{
@@ -174,7 +175,7 @@ public class EnemyShipAI : MonoBehaviour
 
 		//Find out where in the swarm grid this ship will be going (the next unoccupied slot)
 		//mSwarmGrid is assigned by the enemy spawner
-		mSwarmGridPosition = mSwarmGrid.GetGridPosition();
+		mSwarmGridPosition = mSwarmGrid.GetGridPosition(this);
 
 		//Set timers to their default values
 		mAttackFrequencyTimer = mAttackFrequencyTimerDefault;
@@ -238,7 +239,7 @@ public class EnemyShipAI : MonoBehaviour
 			mLifespanLength -= Time.deltaTime;
 			if(mLifespanLength < 0f)
 			{
-				mSwarmGridPosition.GetComponent<SwarmGridSlot>().mOccupied = false;
+				mSwarmGridPosition.GetComponent<SwarmGridSlot>().ClearOccupation();
 				Destroy(this.gameObject);
 			}
 		}
@@ -386,7 +387,7 @@ public class EnemyShipAI : MonoBehaviour
 		//Delete self is strangely far out of bounds for bug reasons ~Adam
 		if((transform.position.y > 60f) || (transform.position.y <-70f) || (transform.position.x > 60f) || (transform.position.x < -60f) || (mAutoDeleteTimer<=0f))
 		{
-			mSwarmGridPosition.GetComponent<SwarmGridSlot>().mOccupied = false;
+			mSwarmGridPosition.GetComponent<SwarmGridSlot>().ClearOccupation();
 
 			Destroy(this.gameObject);
 		}
@@ -692,7 +693,7 @@ public class EnemyShipAI : MonoBehaviour
 	{
 		GameObject enemyBullet;
 		enemyBullet = Instantiate(mEnemyBullet, transform.position, Quaternion.identity) as GameObject;
-	}//End of ShootEnemyBullet()
+	}//END of ShootEnemyBullet()
 
 	public void ShootSecondaryEnemyBullet()
 	{
@@ -701,7 +702,15 @@ public class EnemyShipAI : MonoBehaviour
 			GameObject enemyBullet;
 			enemyBullet = Instantiate(mSecondaryBullet, transform.position, Quaternion.identity) as GameObject;
 		}
-	}//End of ShootEnemyBullet()
+	}//END of ShootEnemyBullet()
+
+	//Gets called externally for having enemies in a formations fire in a fixed pattern ~Adam
+	public void ShootPatternBullet(float bulletAngle)
+	{
+		GameObject enemyBullet;
+		enemyBullet = Instantiate(mEnemyBullet, transform.position, Quaternion.Euler(Vector3.forward * bulletAngle)) as GameObject;
+		enemyBullet.GetComponent<EnemyBulletController>().mFireDir = enemyBullet.transform.up*-1f;
+	}//END of ShootPatternBullet()
 
 	void OnCollisionEnter(Collision other)
 	{
@@ -840,7 +849,7 @@ public class EnemyShipAI : MonoBehaviour
 		}
 
 
-		mSwarmGridPosition.GetComponent<SwarmGridSlot>().mOccupied = false;
+		mSwarmGridPosition.GetComponent<SwarmGridSlot>().ClearOccupation();
 		mScoreManager.AdjustScore(mPointValue, mKillerNumber <= 1);
 		
 		if(mDeathRequired)

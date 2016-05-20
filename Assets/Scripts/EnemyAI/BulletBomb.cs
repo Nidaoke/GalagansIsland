@@ -16,14 +16,17 @@ public class BulletBomb : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		if(other.GetComponent<EnemyShipAI>() != null)
+		EnemyShipAI enemyShip = other.GetComponent<EnemyShipAI>();
+		if(enemyShip != null)
 		{
-			if(!other.name.Contains("Red"))
+			if(enemyShip.mDestroyedByBombs)
 			{
-				other.GetComponent<EnemyShipAI>().EnemyShipDie();
+				enemyShip.EnemyShipDie();
 			}
 		}
-		if(other.GetComponent<PlayerBulletController>() != null || (other.GetComponent<EnemyBulletController>() != null && other.GetComponent<EnemyBulletController>().mDestroyedByBombs))
+		PlayerBulletController playerBullet = other.GetComponent<PlayerBulletController>();
+		EnemyBulletController enemyBullet = other.GetComponent<EnemyBulletController>();
+		if(playerBullet != null || (enemyBullet != null && enemyBullet.mDestroyedByBombs) )
 		{
 			Destroy (other.gameObject);
 		}

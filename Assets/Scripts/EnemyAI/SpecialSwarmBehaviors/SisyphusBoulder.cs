@@ -56,6 +56,12 @@ public class SisyphusBoulder : MonoBehaviour
 			}
 		}
 
+		//Keep swarm grid slots all facing the same way ~Adam
+		foreach(SwarmGridSlot gridSlot in FindObjectsOfType<SwarmGridSlot>())
+		{
+			gridSlot.gameObject.transform.rotation = Quaternion.Euler(Vector3.zero);
+		}
+
 	}//END of Update()
 
 	IEnumerator WaitToDrop(float hangTime)

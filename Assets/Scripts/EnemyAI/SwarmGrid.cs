@@ -132,7 +132,7 @@ public class SwarmGrid : MonoBehaviour
 
 
 	//Finding the next empty position in the grid
-	public GameObject GetGridPosition()
+	public GameObject GetGridPosition(EnemyShipAI searchingShip)
 	{
 		//Set to -1 to show that we haven't found a GridSlot yet
 		int gridPosition = -1;
@@ -144,7 +144,7 @@ public class SwarmGrid : MonoBehaviour
 			if (mGridSlots[i] != null && !mGridSlots[i].mOccupied)
 			{
 				gridPosition = i;
-				mGridSlots[i].mOccupied = true;
+				mGridSlots[i].SetOccupier(searchingShip);
 				break;
 			}
 		}
@@ -161,7 +161,24 @@ public class SwarmGrid : MonoBehaviour
 		}
 
 	}//END of GetGridPosition()
-	
+
+	//For checking if the swarm grid is full
+	public bool CheckIfSwarmFull()
+	{
+		bool swarmFull = true;
+		//Loop through mGridSlots until you find an empty one ~Adam
+		for (int i = 0; i < mGridSlots.Length; i++)
+		{
+			//if we find an open GridSlot, set swarmFull to false because the grid isn't full ~Adam
+			if (mGridSlots[i] != null && !mGridSlots[i].mOccupied)
+			{
+				swarmFull = false;
+				break;
+			}
+		}
+		return swarmFull;
+	}
+
 	//For Changing the shape of the Swarm's formation
 	public void ChangeFormation(int formationNumber)
 	{
@@ -181,5 +198,18 @@ public class SwarmGrid : MonoBehaviour
 	public int GetFormationNumber()
 	{
 		return mFormationUsed;
+	}//END of GetFormationNumber()
+
+	public bool CheckIfSwarmEmpty()
+	{
+		bool swarmEmpty = true;
+		foreach (SwarmGridSlot slot in mGridSlots)
+		{
+			if(slot.mOccupied)
+			{
+				swarmEmpty = false;
+			}
+		}
+		return swarmEmpty;
 	}
 }
