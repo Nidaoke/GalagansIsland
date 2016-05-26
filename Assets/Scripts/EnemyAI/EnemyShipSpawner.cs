@@ -103,66 +103,67 @@ public class EnemyShipSpawner : MonoBehaviour
 			if(!mTargetSwarmGrid.CheckIfSwarmFull())
 			{
 				GameObject NewEnemy = Instantiate(mEnemyToSpawn, transform.position, Quaternion.identity) as GameObject;
-				NewEnemy.GetComponent<EnemyShipAI>().mSwarmGrid = mTargetSwarmGrid;
+				EnemyShipAI enemyAI = NewEnemy.GetComponent<EnemyShipAI>();
+				enemyAI.mSwarmGrid = mTargetSwarmGrid;
 
-				NewEnemy.GetComponent<EnemyShipAI>().mDeathRequired = mSpawnsRequiredEnemies;
+				enemyAI.mDeathRequired = mSpawnsRequiredEnemies;
 
-				NewEnemy.GetComponent<EnemyShipAI>().mMinimumFirstAttackTime = mMininumFirstAttackTimeOverride+Time.time;
+				enemyAI.mMinimumFirstAttackTime = mMininumFirstAttackTimeOverride+Time.time;
 
 				//If statement for overriding flight speed
 				if(mOverridingFlightSpeed)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mSpeed = mOverriddenFlightSpeed;
+					enemyAI.mSpeed = mOverriddenFlightSpeed;
 				}
-				NewEnemy.GetComponent<EnemyShipAI>().mFormSpeed = mOverriddenFormSpeed;
+				enemyAI.mFormSpeed = mOverriddenFormSpeed;
 
 				//If statements for overriding the Loop behavior for the spawned enemies
 				if(mDontDoFirstLoop)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mHasLooped = true;
+					enemyAI.mHasLooped = true;
 				}
 				if (mUsingLoopPoint && mLoopPoint != null)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mLoopPoint = this.mLoopPoint;
+					enemyAI.mLoopPoint = this.mLoopPoint;
 				}
 				if(mOverridingLoopTightness)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mLoopCircleTightness = mLoopOverrideTightnessAmount;
+					enemyAI.mLoopCircleTightness = mLoopOverrideTightnessAmount;
 				}
 				if (mOverridingLoopTime)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mLoopTime = mLoopOverrideTimeAmount;
+					enemyAI.mLoopTime = mLoopOverrideTimeAmount;
 				}
 
 				//If statements for overriding attack behavior
 				if(mOverridingAttackFrequency)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mAttackFrequencyTimerDefault = mAttackFrequencyOverrideTimeAmount;
+					enemyAI.mAttackFrequencyTimerDefault = mAttackFrequencyOverrideTimeAmount;
 				}
 				if(mOverridingAttackLength)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mAttackLengthTimerDefault = mAttackLengthOverrideTimeAmount;
+					enemyAI.mAttackLengthTimerDefault = mAttackLengthOverrideTimeAmount;
 				}
 				if(mOverridingShotFrequency)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mShootTimerDefault = mShootingFrequencyOverrideTimeAmount;
+					enemyAI.mShootTimerDefault = mShootingFrequencyOverrideTimeAmount;
 				}
-				NewEnemy.GetComponent<EnemyShipAI>().mRandomFirstShotTime = mRandomFirstShotTime;
+				enemyAI.mRandomFirstShotTime = mRandomFirstShotTime;
 				if(mLimitAutoShooters)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mLimitedAutoFire = true;
-					NewEnemy.GetComponent<EnemyShipAI>().mLimitedShootingChance = mLimitedAuotShootRate;
+					enemyAI.mLimitedAutoFire = true;
+					enemyAI.mLimitedShootingChance = mLimitedAuotShootRate;
 				}
 
 				//If statements for overriding lifespan
 				if(mOverridingLifespan)
 				{
-					NewEnemy.GetComponent<EnemyShipAI>().mLimitedLifespan = true;
-					NewEnemy.GetComponent<EnemyShipAI>().mLifespanLength = mLifespanOverrideTimeAmount;
+					enemyAI.mLimitedLifespan = true;
+					enemyAI.mLifespanLength = mLifespanOverrideTimeAmount;
 				}
 
 				//Delete the enemy if it couldn't find a spot in the swarm
-				if (NewEnemy.GetComponent<EnemyShipAI>().mSwarmGrid == null)
+				if (enemyAI.mSwarmGrid == null)
 				{
 					Destroy(NewEnemy.gameObject);
 				}

@@ -40,7 +40,14 @@ public class NyanRunner : MonoBehaviour
 		{
 			mVertMoveDir = -1f;
 		}
-		transform.Translate(Vector3.up*mspeed*mVertMoveDir*Time.deltaTime);
+		if(Mathf.Abs(transform.position.y-mRunPoints[mNextPoint].position.y)>0.5f)
+		{
+			transform.Translate(Vector3.up*mspeed*mVertMoveDir*3f*Time.deltaTime);
+		}
+		else
+		{
+			transform.Translate(Vector3.up*mspeed*mVertMoveDir*Time.deltaTime);
+		}
 		#endregion
 
 		//Track which pipe to go to next ~Adam

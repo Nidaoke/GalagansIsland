@@ -136,9 +136,18 @@ public class EnemyShipAI : MonoBehaviour
 	[HideInInspector] public int mKillerNumber = 0;
 	public bool mDestroyedByBombs = true;
 
+
+	//For making the enemy not rotate as it enters the play field ~Adam
+		//If we want to go back to having enemy sprites rotate as they come in, replace all references to this variable with "transform.up" ~Adam
+	Vector3 mMovementTransform = Vector3.up;
+
 	// Use this for initialization
 	void Start () 
 	{
+		mMovementTransform = transform.up;
+
+
+
 		GetComponent<Animator> ().logWarnings = false;
 
 		if (mLimitedAutoFire) 
@@ -444,10 +453,10 @@ public class EnemyShipAI : MonoBehaviour
 		dist = toSwarm.magnitude;
 		toSwarm.Normalize();
 		
-		transform.up += toSwarm;
-		transform.up.Normalize();
+		mMovementTransform += toSwarm;
+		mMovementTransform.Normalize();
 		
-		GetComponent<Rigidbody>().velocity = transform.up * mSpeed;
+		GetComponent<Rigidbody>().velocity = mMovementTransform * mSpeed;
 
 
 
@@ -491,20 +500,21 @@ public class EnemyShipAI : MonoBehaviour
 	void DoFlightLoop()
 	{
 		#region Basic enemy movement was already written when I joined the project.  My main edit to this region was to make movement speed, circle-tightness, and timers variable-based rather than hard-coded in order to allow variations between enemy types.
+		Vector3 moveRightVector = Quaternion.Euler(0,0,-90)*mMovementTransform;
 
 		//Set up the directional angle to fly in a circle
-		mVel += new Vector2(transform.right.x*mLoopCircleTightness, transform.right.y*mLoopCircleTightness) * Time.deltaTime;
+		mVel += new Vector2(moveRightVector.x*mLoopCircleTightness, moveRightVector.y*mLoopCircleTightness) * Time.deltaTime;
 		
 		mVel.Normalize();
-		transform.up += new Vector3(mVel.x, mVel.y, 0);
-		transform.up.Normalize();
+		mMovementTransform += new Vector3(mVel.x, mVel.y, 0);
+		mMovementTransform.Normalize();
 		//Set the velocity to move in the cicle
-		GetComponent<Rigidbody>().velocity = transform.up * mSpeed;
+		GetComponent<Rigidbody>().velocity = mMovementTransform * mSpeed;
 
 		//Figure out whether or not we are pointed at this unit's swarm grid position
 		Vector3 toSpot = mSwarmGridPosition.transform.position - transform.position;
 		toSpot.Normalize();
-		float difference = Vector3.Dot(toSpot, transform.up);
+		float difference = Vector3.Dot(toSpot, mMovementTransform);
 		
 		
 		//Transitions to ApproachingSwarm AI state if the timer has run out and this unit is pointed towards its grid slot
@@ -544,7 +554,7 @@ public class EnemyShipAI : MonoBehaviour
 		mAttackFrequencyTimer -= Time.deltaTime;
 		
 		transform.position = mSwarmGridPosition.transform.position;
-		transform.up = mSwarmGridPosition.transform.up;
+		mMovementTransform = mSwarmGridPosition.transform.up;
 
 
 		#endregion
