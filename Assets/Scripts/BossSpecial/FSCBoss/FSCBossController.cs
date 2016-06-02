@@ -4,12 +4,10 @@ using UnityEngine.UI;
 
 public class FSCBossController : MonoBehaviour 
 {
-	//The timer that determines what phase the boss is in ~Adam
-		// <0 Spawnning, invincible
-		// 0-10 Firing, invincible minions circling
-		// 10-15 hittable, minions attacking
-		// 15-20 hitable, spawning, minions circling, go back to 0 when 20 is hit
-	[SerializeField] private float mBehaviorTimer = -5f;
+	
+	[SerializeField] private FSCBossTeleporter mBossTeleporter;
+	enum PortalBossBehaviorState { StartupSpawn, Firing, MinionAttacking, Spawning };
+	[SerializeField] private PortalBossBehaviorState mBehaviorState;
 
 	public int mBossHP = 300;
 
@@ -23,29 +21,42 @@ public class FSCBossController : MonoBehaviour
 
 	//The main particle beam laser ~Adam
 	[SerializeField] private GameObject mMouthLaser;
-
+	[SerializeField] private GameObject mMouthLaserHolder;
 
 	[SerializeField] private SpriteRenderer mEyeGraphic;
 
 	GameObject mPlayerShip;
 	ScoreManager mScoreManager;
-	[SerializeField] GameObject mScreenFader;
 	[SerializeField] private GameObject mDeathExplosion;
 	[SerializeField] private GameObject mFinalExplosion;
-	[SerializeField] private GameObject mGameHUD;
 
 	[SerializeField] private Animator mAnimator;
 	bool mFiring = false;
 	float mEndGameTimer = 0f;
+
+	LevelKillCounter mKillCounter;
+	public Vector3 mLaserTargetRotation = Vector3.zero;
+	public float mLaserRotateSpeed = 10f;
+
+
+
+	Vector3 mTargetPlayerPosition;
+
+	[SerializeField] private float mStartupSpawnTime = 5f;
+	[SerializeField] private float mFireTime = 5f;
+	[SerializeField] private float mMinionAttackTime = 5f;
+	[SerializeField] private float mSpawnTime = 5f;
 
 	// Use this for initialization
 	void Start () 
 	{
 		mPlayerShip = FindObjectOfType<PlayerShipController> ().gameObject;
 		mScoreManager = FindObjectOfType<ScoreManager>() as ScoreManager;
-		mScreenFader.GetComponent<Renderer>().material.color = Color.clear;
-//		mGameHUD = ;
 		mEyeGraphic.color = Color.clear;
+		mKillCounter = FindObjectOfType<LevelKillCounter>();
+
+		StartCoroutine(StartupSpawnTimer());
+
 	}//END of Start()
 	
 	// Update is called once per frame
@@ -56,6 +67,17 @@ public class FSCBossController : MonoBehaviour
 		{
 			mScoreManager = FindObjectOfType<ScoreManager>() as ScoreManager;
 		}
+		else
+		{
+			if(mScoreManager.mP1Score >= mScoreManager.mP2Score)
+			{
+				mPlayerShip = mScoreManager.mPlayerAvatar;
+			}
+			else if (mScoreManager.mPlayer2Avatar != null)
+			{
+				mPlayerShip = mScoreManager.mPlayer2Avatar;
+			}
+		}
 		//Make sure we always have a Player Ship ~Adam
 		if (mPlayerShip == null) 
 		{
@@ -63,7 +85,6 @@ public class FSCBossController : MonoBehaviour
 		}
 		else
 		{
-			mBehaviorTimer += Time.deltaTime;
 			//If the boss is still alive, do stuff ~Adam
 			if(mBossHP >0)
 			{
@@ -72,13 +93,9 @@ public class FSCBossController : MonoBehaviour
 
 				mEyeGraphic.color = Color.Lerp(mEyeGraphic.color, Color.clear, 0.01f);
 				GetComponent<SpriteRenderer>().color = Color.Lerp(GetComponent<SpriteRenderer>().color, Color.white, 0.01f);
-				//Go back to start of behavior loop ~Adam
-				if(mBehaviorTimer > 20f)
-				{
-					mBehaviorTimer = 0f;
-				}
+
 				// 15-20 hitable, spawning, minions circling, go back to 0 when 20 is hit ~Adam
-				else if (mBehaviorTimer > 15f)
+				if (mBehaviorState == PortalBossBehaviorState.Spawning)
 				{
 					#region Spawning minions ~Adam
 					SpawnMinions();
@@ -88,7 +105,7 @@ public class FSCBossController : MonoBehaviour
 				
 				}
 				// 10-15 hittable, minions attacking ~Adam
-				else if (mBehaviorTimer > 10f)
+				else if (mBehaviorState == PortalBossBehaviorState.MinionAttacking)
 				{
 					//Spawn minions ~Adam
 					SpawnMinions();
@@ -104,7 +121,7 @@ public class FSCBossController : MonoBehaviour
 					mMouthLaser.GetComponent<ParticleSystem>().Stop();
 				}
 				// 0-10 Firing, invincible minions circling
-				else if (mBehaviorTimer >= 0f)
+				else if (mBehaviorState == PortalBossBehaviorState.Firing)
 				{
 					#region Stop the spawning of minions ~Adam
 
@@ -117,7 +134,8 @@ public class FSCBossController : MonoBehaviour
 					//Fire the Laser ~Adam
 					mFiring = true;
 					GetComponent<Collider>().isTrigger = false;
-					mMouthLaser.transform.LookAt(mPlayerShip.transform.position);
+					//mMouthLaser.transform.LookAt(mPlayerShip.transform.position);
+					LaserSpin();
 
 					if(!mMouthLaser.GetComponent<ParticleSystem>().isPlaying)
 					{
@@ -126,7 +144,7 @@ public class FSCBossController : MonoBehaviour
 
 				}
 				// <0 Spawnning, invincible ~Adam
-				else if (mBehaviorTimer < 0f)
+				else if (mBehaviorState == PortalBossBehaviorState.StartupSpawn)
 				{
 					#region Spawning minions ~Adam
 					SpawnMinions();
@@ -146,7 +164,8 @@ public class FSCBossController : MonoBehaviour
 				//StopMinionSpawning();
 				
 				#endregion
-
+				mHornSpawnerLeft.gameObject.SetActive(false);
+				mHornSpawnerRight.gameObject.SetActive(false);
 				//Kill the remaining minions ~Adam
 				if(FindObjectsOfType<EnemyShipAI>().Length >0)
 				{
@@ -162,37 +181,22 @@ public class FSCBossController : MonoBehaviour
 
 
 
-				FindObjectOfType<ScoreManager>().enabled = false;
-				FindObjectOfType<LevelKillCounter>().enabled = false;
-				FindObjectOfType<PauseManager>().enabled = false;
-				mGameHUD.SetActive(false);
+
 				mEndGameTimer += Time.deltaTime;
 
 				Instantiate(mDeathExplosion, transform.position+(new Vector3(Random.Range(-5f,5f),Random.Range(-5f,5f),-0.5f)), Quaternion.identity);
 				
-				mScreenFader.GetComponent<Renderer>().enabled = true;
-				mScreenFader.GetComponent<Renderer>().material.color = Color.Lerp(mScreenFader.GetComponent<Renderer>().material.color, new Color(0,0,0,1f),0.01f);
-				AudioListener.volume -=  0.001f;
 				if(mEndGameTimer >= 2.8f)
 				{
 					Instantiate(mDeathExplosion, transform.position+(new Vector3(0f,0f,-0.5f)), Quaternion.identity);
-					AudioListener.volume -=  0.01f;
-					
+
 				}
 				if(mEndGameTimer >= 6f)
 				{
-					if(FindObjectOfType<PlayerShipController>() != null)
-					{
-						Destroy(FindObjectOfType<PlayerShipController>().gameObject);
-					}
-					if (FindObjectOfType<PlayerTwoShipController>() != null)
-					{
-						Destroy(FindObjectOfType<PlayerTwoShipController>().gameObject);
-					}
-					Destroy(FindObjectOfType<LevelKillCounter>().gameObject);
-					//Destroy(FindObjectOfType<ScoreManager>().gameObject);
-					mScoreManager.mLevelInfoText.text = "Thank you for playing!";
-					Application.LoadLevel("Credits");
+					mKillCounter.mKillCount = mKillCounter.mRequiredKills+1;
+					mScoreManager.AdjustScore(200, true);
+					Destroy(this.gameObject);
+
 				}
 			}
 		}
@@ -217,9 +221,13 @@ public class FSCBossController : MonoBehaviour
 			
 		}
 		//Kill Player when touched
-		if(other.gameObject.GetComponent<PlayerShipController>() != null)
+		if(other.gameObject.GetComponent<PlayerOneShipController>() != null)
 		{
 			mScoreManager.LoseALife();
+		}
+		else if(other.gameObject.GetComponent<PlayerTwoShipController>() != null)
+		{
+			mScoreManager.LosePlayerTwoLife();
 		}
 	}//END of OnCollisionEnter()
 
@@ -288,4 +296,93 @@ public class FSCBossController : MonoBehaviour
 			minion.mHasLooped = false;
 		}
 	}
+
+
+
+	void LaserSpin()
+	{
+		//Spin on its own towards the player ~Adam
+		if(mPlayerShip != null)
+		{
+
+
+			if(mScoreManager != null)
+			{
+				if(mScoreManager.mP1Score >= mScoreManager.mP2Score-2)
+				{
+					mTargetPlayerPosition = mScoreManager.mPlayerAvatar.transform.position;
+				}
+				else
+				{
+					mTargetPlayerPosition = mScoreManager.mPlayer2Avatar.transform.position;
+				}
+				mLaserTargetRotation = new Vector3(mTargetPlayerPosition.x-transform.position.x,mTargetPlayerPosition.y-transform.position.y,0f);
+			}
+
+			else
+			{
+				mTargetPlayerPosition = mPlayerShip.transform.position;
+				mLaserTargetRotation = new Vector3(mTargetPlayerPosition.x-transform.position.x,mTargetPlayerPosition.y-transform.position.y,0f);
+
+			}
+
+			Vector3.Normalize (mLaserTargetRotation);
+			mLaserTargetRotation = new Vector3(0f, 0f, Vector3.Angle(mLaserTargetRotation, Vector3.down));
+			if(mTargetPlayerPosition.x < transform.position.x)
+			{
+				mLaserTargetRotation *= -1f;
+			}
+
+			mMouthLaserHolder.transform.rotation =Quaternion.Lerp (mMouthLaserHolder.transform.rotation, Quaternion.Euler (mLaserTargetRotation), 0.001f*mLaserRotateSpeed * Time.timeScale);
+		}
+		//Just spin without regards to the player
+		else
+		{
+
+			mLaserTargetRotation = transform.rotation.eulerAngles + new Vector3(0f,0f,mLaserRotateSpeed);
+
+			mMouthLaserHolder.transform.rotation =Quaternion.Lerp (transform.rotation, Quaternion.Euler (mLaserTargetRotation), 0.5f * Time.timeScale);
+
+
+		}
+	}
+
+
+	IEnumerator StartupSpawnTimer()
+	{
+		yield return new WaitForSeconds(mStartupSpawnTime);
+		mBehaviorState = PortalBossBehaviorState.MinionAttacking;
+		StartCoroutine(MinionAttackTimer());
+	}
+
+	IEnumerator MinionAttackTimer()
+	{
+		yield return new WaitForSeconds(mMinionAttackTime);
+		mBehaviorState = PortalBossBehaviorState.Spawning;
+		StartCoroutine(MinionSpawnTimer());
+	}
+
+	IEnumerator MinionSpawnTimer()
+	{
+		yield return new WaitForSeconds(mSpawnTime);
+		if(!mKillCounter.mLevelComplete && mBossHP >0)
+		{
+			mBossTeleporter.StartTeleport();
+		}
+
+	}
+
+	IEnumerator MouthLaserFireTimer()
+	{
+		mBehaviorState = PortalBossBehaviorState.Firing;
+		yield return new WaitForSeconds(mFireTime);
+		mBehaviorState = PortalBossBehaviorState.MinionAttacking;
+		StartCoroutine(MinionAttackTimer());
+	}
+
+	public void StartMouthLaser()
+	{
+		StartCoroutine(MouthLaserFireTimer());
+	}
 }
+
