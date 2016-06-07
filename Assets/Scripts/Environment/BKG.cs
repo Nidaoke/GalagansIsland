@@ -100,6 +100,10 @@ public class BKG : MonoBehaviour
 					transform.position = new Vector3(transform.position.x, mDefaultPosition.y, mDefaultPosition.z);
 				}
 			}
+			else if(GameObject.FindGameObjectWithTag("Player") != null)
+			{
+				mPlayerAvatar = GameObject.FindGameObjectWithTag("Player");
+			}
 			if(mPlayerMoveDirection.y >= 0f)
 			{
 				mRenderOffest += (Time.deltaTime * m_fSpeed) + (Time.deltaTime*m_fSpeed*mPlayerMoveDirection.y) ;
