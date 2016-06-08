@@ -9,7 +9,7 @@ public class MenuItemActivator : MonoBehaviour
 
 	public Transform goTo;
 
-	public float mActivationTimer = 0f;
+	public float mActivationTimer = 8.25f;
 
 	public bool mainMenu;
 
@@ -18,16 +18,16 @@ public class MenuItemActivator : MonoBehaviour
 	// Use this for initialization
 	void Start () 
 	{
-	
+		StartCoroutine(MenuActivation());
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
-		if (mainMenu) {
-
-			mActivationTimer += Time.deltaTime;
-		}
+//		if (mainMenu) {
+//
+//			mActivationTimer += Time.deltaTime;
+//		}
 
 		transform.position = Vector3.Lerp(transform.position, goTo.position, 0.01f);
 
@@ -40,13 +40,23 @@ public class MenuItemActivator : MonoBehaviour
 			transform.localScale = Vector3.Lerp(transform.localScale, new Vector3(6.9f,6.9f,6.9f), 0.01f);
 		}
 
-		if (mainMenu) {
+//		if (mainMenu) {
+//
+//			if(mActivationTimer > 8.25f && !mUiActivated)
+//			{
+//				mMenuUIController.SetActive(true);
+//				mUiActivated = true;
+//			}
+//		}
+	}
 
-			if(mActivationTimer > 8.25f && !mUiActivated)
-			{
-				mMenuUIController.SetActive(true);
-				mUiActivated = true;
-			}
+	IEnumerator MenuActivation()
+	{
+		if (mainMenu) 
+		{
+			yield return new WaitForSeconds(mActivationTimer);
+			mMenuUIController.SetActive(true);
+			mUiActivated = true;
 		}
 	}
 }
