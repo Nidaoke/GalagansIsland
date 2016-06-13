@@ -1,10 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//Continuously spawn enemies on a set time interval and assign them to a swarm grid ~Adam
+//There are usually multiple game objects per scene with this script, with each one spawning a single type of enemy and sending them to a single specified SwarmGrid ~Adam
+//The game objects with this script can be moved around in-editor or at runtime to change where the enemies are spawned/what direction they enter the screen from ~Adam
+//The various variables for overriding spawned enemy properties allow us to further customize the behavior of existing enemy prefabs on a level-by-level basis without altering the prefabs ~Adam
+
 public class EnemyShipSpawner : MonoBehaviour 
 {
-	//Set this to true if we want this spawner to do more than one wave of enemies
+	//Set this to true if we want this spawner to do more than one wave of enemies ~Adam
 	public bool mSpawnMultipleWaves = false;
+	//Randization range for time between waves ~Adam
 	public float mWaveRefreshTimeMin = 30f;
 	public float mWaveRefreshTimeMax = 60f;
 
@@ -14,40 +20,40 @@ public class EnemyShipSpawner : MonoBehaviour
 	[SerializeField] private int mRespawnWaveCount = 0;
 	[SerializeField] private bool mSpawnsRequiredEnemies = true;
 
-	//The SwarmGrid this spawner is sending enemies to
+	//The SwarmGrid this spawner is sending enemies to ~Adam
 	public SwarmGrid mTargetSwarmGrid;
-	//Whether or not to have the spawned enemies fly to and loop around a specified point
+	//Whether or not to have the spawned enemies fly to and loop around a specified point ~Adam
 	[SerializeField] private bool mUsingLoopPoint = false;
-	//The point that the spawned enemies will loop around if the above is true
+	//The point that the spawned enemies will loop around if the above is true ~Adam
 	[SerializeField] private GameObject mLoopPoint;
 
 
-	//*****Values for overriding spawned enemy properties******
+	#region Values for overriding spawned enemy properties ~Adam
 
-	//Whether or not to overide enemy flight speed
+	//Whether or not to overide enemy flight speed ~Adam
 	[SerializeField] private bool mOverridingFlightSpeed;
-	//Overriden flight speed value
+	//Overriden flight speed value ~Adam
 	[SerializeField] private float mOverriddenFlightSpeed = 15f;
 	[SerializeField] private float mOverriddenFormSpeed = 15f;
-	//Whether or not the spawned enemies skip the looping step on their way to the swarm for the first time
+	//Whether or not the spawned enemies skip the looping step on their way to the swarm for the first time ~Adam
 	[SerializeField] private bool mDontDoFirstLoop = false;
-	//Whether or not we override how tight a loop the spawned enemies make
+	//Whether or not we override how tight a loop the spawned enemies make ~Adam
 	[SerializeField] private bool mOverridingLoopTightness = false;
-	//How tight to make the overriden loops
+	//How tight to make the overriden loops ~Adam
 	[SerializeField] private float mLoopOverrideTightnessAmount = 1f;
-	//Whther or not to ovveride how long is spent making loops
+	//Whther or not to ovveride how long is spent making loops ~Adam
 	[SerializeField] private bool mOverridingLoopTime = false;
 	//How long to make the overriden loops last
 	[SerializeField] private float mLoopOverrideTimeAmount = 0.5f;
-	//Whther or not to ovveride how long is spent in the swarm between making attacks
+	//Whther or not to ovveride how long is spent in the swarm between making attacks ~Adam
 	[SerializeField] private bool mOverridingAttackFrequency = false;
-	//How long to make the overriden loops last
+	//How long to make the overriden loops last ~Adam
 	[SerializeField] private float mAttackFrequencyOverrideTimeAmount = 10f;
-	//Whther or not to ovveride how long is spent diving down when making attacks
+	//Whther or not to ovveride how long is spent diving down when making attacks ~Adam
 	[SerializeField] private bool mOverridingAttackLength = false;
-	//How long to make the overriden loops last
+	//How long to make the overriden loops last ~Adam
 	[SerializeField] private float mAttackLengthOverrideTimeAmount = 10f;
-	//How long to make the overriden loops last
+	//How long to make the overriden loops last ~Adam
 	[SerializeField] private bool mOverridingShotFrequency = false;
 	[SerializeField] private float mShootingFrequencyOverrideTimeAmount = 2f;
 	[SerializeField] private bool mRandomFirstShotTime = false;
@@ -56,24 +62,24 @@ public class EnemyShipSpawner : MonoBehaviour
 
 	[SerializeField] private float mMininumFirstAttackTimeOverride = 0f;
 
-	//Whether or not to override enemy lifespan
+	//Whether or not to override enemy lifespan ~Adam
 	[SerializeField] private bool mOverridingLifespan = false;
 	[SerializeField] private float mLifespanOverrideTimeAmount = 10f;
 
-	//*****End of spawned enemy override variables*****
+	#endregion
 
-	//Are we currently spawning enemies?
+	//Are we currently spawning enemies? ~Adam
 	public bool mSpawning = true;
-	//The speed at which enemies are spawned
+	//The speed at which enemies are spawned ~Adam
 	public float mDefaultSpawnInterval = 1f;
 	private float mSpawnInterval;
-	//How long to wait before enemies are first spawned
+	//How long to wait before enemies are first spawned ~Adam
 	public float mWaveStartTime = 2f;
-	//Which type of enemy to spawn
+	//Which type of enemy to spawn ~Adam
 	public GameObject mEnemyToSpawn;
-	//How many enemies to spawn per wave
+	//How many enemies to spawn per wave ~Adam
 	[SerializeField] private int mMaxEnemySpawn = 5;
-	//How many enemies we've spawned so far
+	//How many enemies we've spawned so far ~Adam
 	[HideInInspector] public int mSpawnCounter = 0;
 	
 	// Use this for initialization
@@ -110,14 +116,15 @@ public class EnemyShipSpawner : MonoBehaviour
 
 				enemyAI.mMinimumFirstAttackTime = mMininumFirstAttackTimeOverride+Time.time;
 
-				//If statement for overriding flight speed
+				#region If statement for overriding flight speed
 				if(mOverridingFlightSpeed)
 				{
 					enemyAI.mSpeed = mOverriddenFlightSpeed;
 				}
 				enemyAI.mFormSpeed = mOverriddenFormSpeed;
+				#endregion
 
-				//If statements for overriding the Loop behavior for the spawned enemies
+				#region If statements for overriding the Loop behavior for the spawned enemies
 				if(mDontDoFirstLoop)
 				{
 					enemyAI.mHasLooped = true;
@@ -134,8 +141,9 @@ public class EnemyShipSpawner : MonoBehaviour
 				{
 					enemyAI.mLoopTime = mLoopOverrideTimeAmount;
 				}
+				#endregion
 
-				//If statements for overriding attack behavior
+				#region If statements for overriding attack behavior
 				if(mOverridingAttackFrequency)
 				{
 					enemyAI.mAttackFrequencyTimerDefault = mAttackFrequencyOverrideTimeAmount;
@@ -154,8 +162,9 @@ public class EnemyShipSpawner : MonoBehaviour
 					enemyAI.mLimitedAutoFire = true;
 					enemyAI.mLimitedShootingChance = mLimitedAuotShootRate;
 				}
+				#endregion
 
-				//If statements for overriding lifespan
+				//If statement for overriding lifespan
 				if(mOverridingLifespan)
 				{
 					enemyAI.mLimitedLifespan = true;
@@ -168,9 +177,14 @@ public class EnemyShipSpawner : MonoBehaviour
 					Destroy(NewEnemy.gameObject);
 				}
 			}
+
+			//Track how many enemies this spawner has ATTEMPTED to spawn.  ~Adam
+			//This, combined with the spawn interval controls how long this spawner is actively attempting to spawn enemies in the sceen ~Adam
+			//It's generally more important to the gameplay to have the spawner running for a predictable amount of time than to have it spawn an exact number of enemies ~Adam
 			mSpawnCounter++;
 			mSpawnInterval += mDefaultSpawnInterval;
-			
+
+			//If this spawner has attempted to spawn its maximum number of enemies, either stop spawning or begin waiting to start a new wave of enemis ~Adam
 			if (mSpawnCounter >= mMaxEnemySpawn)
 			{
 				mSpawnCounter = 0;

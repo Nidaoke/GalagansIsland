@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//This script is attached to the bullet prefabs that get instantiated by the EnemyShipAI ~Adam
+//It allows for multiple, editable projectile prefabs with unique behaviors and properties that all use a single base script ~Adam
+
 public class EnemyBulletController : MonoBehaviour 
 {
 	
@@ -37,7 +40,7 @@ public class EnemyBulletController : MonoBehaviour
 		{
 			mPlayer = FindObjectOfType<PlayerShipController>().gameObject;
 		}
-		#region co-op mode stuff
+		#region Keep a reference to Player 2 in Co-op Mode ~Adam
 		if(mScoreController.mPlayer2Avatar != null)
 		{
 			mPlayerClone = mScoreController.mPlayer2Avatar;
@@ -51,18 +54,17 @@ public class EnemyBulletController : MonoBehaviour
 			mSlowTimeController = FindObjectOfType<SlowTimeController>();
 		}
 
-		//Used for firing in a particular pattern (i.e. rotational pattern on boss horns)~Adam
+		//Used for firing in a particular pattern (i.e. rotational pattern on prototype boss horns)~Adam
 		if (mFixedFireDir) 
 		{
 			bulletForce = mFireDir * mBulletSpeed;
-			//transform.rotation = Quaternion.Euler(new Vector3(90f,0f,0f) + transform.rotation.eulerAngles);
 		}
-		//Used for aiming at the player ~Adam
+		//Used for aiming at the player when first instantiated ~Adam
 		else if (mAimAtPlayer) 
 		{
 			Vector3 directionToPlayer = Vector3.down;
-			#region twin-stick clone stuff
-			//Fire at the clone ship if it is both present and closer -Adam
+			#region Determine which player is closer in Co-Op mode ~Adam
+			//Fire at the player 2 ship if it is both present and closer -Adam
 			if (mPlayerClone != null && mPlayerClone.activeInHierarchy && (Vector3.Distance (transform.position, mPlayerClone.transform.position) <= Vector3.Distance (transform.position, mPlayer.transform.position) || !mPlayer.activeInHierarchy)) 
 			{
 				directionToPlayer = mPlayerClone.transform.position - transform.position;
@@ -73,19 +75,19 @@ public class EnemyBulletController : MonoBehaviour
 			#endregion
 			else 
 			{
-				//fire at the player
+				//fire at the player ~Adam
 				directionToPlayer = mPlayer.transform.position - transform.position;
 				bulletForce = Vector3.Normalize (directionToPlayer) * mBulletSpeed;
 				transform.LookAt (mPlayer.transform.position);
 				transform.rotation = Quaternion.Euler (new Vector3 (90f, 0f, 0f) + transform.rotation.eulerAngles);
 			}
 		} 
-		//For constantly tracking/homing in on the player
+		//For constantly tracking/chasing/homing in on the player after the bullet has been fired ~Adam
 		else if (mMoveTowardsPlayer) 
 		{
 			Vector3 directionToPlayer = Vector3.down;
-			#region twin-stick clone stuff
-			//Fire at the clone ship if it is both present and closer -Adam
+			#region Determine which player is closer in Co-Op mode ~Adam
+			//Fire at the player 2 ship if it is both present and closer -Adam
 			if (mPlayerClone != null && mPlayerClone.activeInHierarchy && (Vector3.Distance (transform.position, mPlayerClone.transform.position) <= Vector3.Distance (transform.position, mPlayer.transform.position) || !mPlayer.activeInHierarchy)) 
 			{
 				directionToPlayer = mPlayerClone.transform.position - transform.position;
@@ -96,7 +98,7 @@ public class EnemyBulletController : MonoBehaviour
 			#endregion
 			else 
 			{
-				//fire at the player
+				//fire at the player ~Adam
 				directionToPlayer = mPlayer.transform.position - transform.position;
 				bulletForce = Vector3.Normalize (directionToPlayer) * mBulletSpeed;
 				transform.LookAt (mPlayer.transform.position);
@@ -106,9 +108,10 @@ public class EnemyBulletController : MonoBehaviour
 		//Just fire up and down ~Adam
 		else
 		{
-			#region twin-stick clone stuff
+			#region Determine which player is closer in Co-Op mode ~Adam
 			if(mPlayerClone != null && mPlayerClone.activeInHierarchy && (Vector3.Distance(transform.position,mPlayerClone.transform.position) <= Vector3.Distance(transform.position,mPlayer.transform.position) || !mPlayer.activeInHierarchy))
 			{
+				//Fire at player 2 ~Adam
 				if (mPlayerClone.transform.position.y > transform.position.y)
 				{
 					bulletForce = new Vector2(0.0f,mBulletSpeed);
@@ -122,7 +125,7 @@ public class EnemyBulletController : MonoBehaviour
 			#endregion
 			else
 			{
-				//Fire up/down
+				//Fire up/down at player 1 ~Adam
 				if (mPlayer.transform.position.y > transform.position.y)
 				{
 					bulletForce = new Vector2(0.0f,mBulletSpeed);
@@ -148,29 +151,20 @@ public class EnemyBulletController : MonoBehaviour
 	{
 		mSelfDestructTimer -= Time.deltaTime;
 
-		//For slow-mo bullet dodging ~Adam
+		#region For slow-mo bullet dodging ~Adam
 		if(mSlowTimeController == null && FindObjectOfType<SlowTimeController>() != null)
 		{
 			mSlowTimeController = FindObjectOfType<SlowTimeController>();
 		}
+		#endregion
 
-
+		//Actively chase the player if set to do so ~Adam
 		if (mMoveTowardsPlayer) 
 		{
-
-//			Vector3 directionToPlayer = Vector3.down;
-//
-//			directionToPlayer = mPlayer.transform.position - transform.position;
-//			bulletForce = Vector3.Normalize (directionToPlayer) * mBulletSpeed;
-//			transform.rotation = Quaternion.Euler (new Vector3 (90f, 0f, 0f) + transform.rotation.eulerAngles);
-//			GetComponent<Rigidbody> ().velocity = bulletForce;
-//
-//			transform.LookAt (mPlayer.transform.position);
-//
-//			transform.rotation = new Quaternion (0, 0, transform.rotation.z, 0);
+			
 			Vector3 directionToPlayer = Vector3.down;
-			#region twin-stick clone stuff
-			//Fire at the clone ship if it is both present and closer -Adam
+			#region Capable of switching which target its chasing if in co-op mode ~Adam
+			//Chase the player 2 ship if it is both present and closer -Adam
 			if (mPlayerClone != null && mPlayerClone.activeInHierarchy && (Vector3.Distance (transform.position, mPlayerClone.transform.position) <= Vector3.Distance (transform.position, mPlayer.transform.position) || !mPlayer.activeInHierarchy)) 
 			{
 				directionToPlayer = mPlayerClone.transform.position - transform.position;
@@ -181,7 +175,7 @@ public class EnemyBulletController : MonoBehaviour
 			#endregion
 			else 
 			{
-				//fire at the player
+				//Chase player 1
 				if(mPlayer != null && mPlayer.activeInHierarchy)
 				{
 					directionToPlayer = mPlayer.transform.position - transform.position;
@@ -194,7 +188,7 @@ public class EnemyBulletController : MonoBehaviour
 
 		}
 
-		//Slow down for slow-mo dodge ~Adam
+		#region Slow down for slow-mo dodge ~Adam
 		if(mSlowTimeController != null)
 		{
 			if(mSlowTimeController.mSlowTimeActive && !mIsSlow)
@@ -210,7 +204,9 @@ public class EnemyBulletController : MonoBehaviour
 			}
 
 		}
-		//Self-destruct after a certain amount of time
+		#endregion
+
+		#region Self-destruct after a certain amount of time
 		if(mSelfDestructTimer<0.0f)
 		{
 			if(mMoveTowardsPlayer)
@@ -224,6 +220,7 @@ public class EnemyBulletController : MonoBehaviour
 
 			Destroy(gameObject);
 		}
+		#endregion
 
 		//Detect distance to player and slow down time if close but not quite hitting ~Adam
 		if (Vector3.Distance(this.transform.position, mPlayer.transform.position) <= 2.85f && mPlayer.activeInHierarchy)
@@ -234,7 +231,8 @@ public class EnemyBulletController : MonoBehaviour
 			}
 		}
 
-		//Detect distance to player and kill the player and destroy self if close enough to "touch" ~Adam
+		#region Detect distance to player and kill the player and destroy self if close enough to "touch" ~Adam
+		//We use this instead of actual collision detection with the player do to issues that the Unity Engine has (or at least had when we started this project) with processing collisions with moving "isTrigger" colliders ~Adam
 		if (Vector3.Distance(this.transform.position, mPlayer.transform.position) <= 1.5f && mPlayer.activeInHierarchy)
 		{
 
@@ -245,8 +243,9 @@ public class EnemyBulletController : MonoBehaviour
 				Destroy(gameObject);
 			}
 		}
+		#endregion
 
-		//If second ship is activated, extend the slow time down ~ Jonathan
+		#region If double ship upgraded is activated, extend the slow time down ~ Jonathan
 		//Also kill the ship FINALLY!!! ~ Jonathan
 		if (mPlayer.GetComponent<PlayerShipController> ().mShipRecovered && mPlayer.activeInHierarchy) 
 		{
@@ -266,9 +265,9 @@ public class EnemyBulletController : MonoBehaviour
 				Destroy(gameObject);
 			}
 		}
+		#endregion
 
-		#region twin-stick clone stuff
-
+		#region Dection for player 2 ship on co-op mode ~Adam
 		//Detect distance to player2 and slow down time if close but not quite hitting ~Adam
 		if (mPlayerClone != null && Vector3.Distance(this.transform.position, mPlayerClone.transform.position) <= 2.5f && mPlayerClone.activeInHierarchy)
 		{
@@ -293,18 +292,14 @@ public class EnemyBulletController : MonoBehaviour
 
 	void OnTriggerEnter (Collider other)
 	{
-
-		/*if (other.tag == "Enemy" && mMoveTowardsPlayer) 
-			other.GetComponent<EnemyShipAI> ().EnemyShipDie ();*/ //Enemy ship doesn't have OnTrigger
-
+		//Some types of enemy bullets can be destroyed by player bullets ~Adam
 		if(other.tag == "Player Bullet")
 		{
 			if(mShootable)
 			{
-
+				//Some shootable bullets can make a lingering explosion effect that can hurt the player ~Adam
 				if(bulletExplosion != null)
 				{
-
 					Instantiate(bulletExplosion, transform.position, Quaternion.identity);
 				}
 
@@ -319,7 +314,7 @@ public class EnemyBulletController : MonoBehaviour
 
 	void OnCollisionEnter (Collision other)
 	{
-
+		//For having certain types of enemy bullets kill other enemies as they chase the player ~Adam
 		if (other.gameObject.tag == "Enemy" && mMoveTowardsPlayer && (other.gameObject.GetComponent<EnemyShipAI>()!= null && other.gameObject.GetComponent<EnemyShipAI>().mGrabber == false)) 
 		{
 			if (mPlayerClone != null && Vector3.Distance (transform.position, mPlayerClone.transform.position) <= Vector3.Distance (transform.position, mPlayer.transform.position)) 
@@ -334,7 +329,7 @@ public class EnemyBulletController : MonoBehaviour
 
 			other.gameObject.GetComponent<EnemyShipAI>().EnemyShipDie ();
 		}
-	}
+	}//END of OnCollisionEnter()
 
 
 

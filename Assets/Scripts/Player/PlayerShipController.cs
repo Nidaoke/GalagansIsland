@@ -6,7 +6,9 @@ using Assets.Scripts.Achievements;
 using XInputDotNetPure; // Required in C#
 
 //This is the main script for controlling the player character. ~Adam
+//It serves as a base class that PlayerOneShipController and PlayerTwoShipController inherit from ~Adam
 //It makes use of the open source version of the InControl Unity plugin for taking game pade input.  This plugin may be found at: "https://github.com/pbhogan/InControl" ~Adam
+
 
 
 public class PlayerShipController : MonoBehaviour 
@@ -21,7 +23,7 @@ public class PlayerShipController : MonoBehaviour
 	public PlayerOneShipController mPlayerOne;
 	public PlayerTwoShipController mPlayerTwo;
 
-	//For multiplaye co-op ~Adam
+	//For distinguishing between controllers on multiplayer co-op ~Adam
 	public InputDevice mPlayerInputDevice;
 	public string mPlayerInputMeta = "";
 
@@ -29,8 +31,8 @@ public class PlayerShipController : MonoBehaviour
 	protected bool playerIndexSet = false;
 	public PlayerIndex playerIndex;
 
-	public bool cheats = false;
-	//For if animating the ship ~Adam
+	public bool cheats = false;//Set to True to enable level skip for debug testing ~Jonathan
+	//For animating the ship ~Adam
 	[SerializeField] protected Animator mMainShipAnimator;
 	[SerializeField] protected Animator mSecondShipAnimator;
 	
@@ -47,7 +49,7 @@ public class PlayerShipController : MonoBehaviour
 	public Vector3 mMoveDir = new Vector3(0f,-1f,0f);
 	
 
-	//Variables for editing drop speeds ~Adam
+	//Variables for editing drop speeds from the Unity editor ~Adam
 	[SerializeField] protected float mMaxDropSpeed = 0.58f;
 	[SerializeField] protected float mDropSpeed = 0.1f;
 	[SerializeField] protected float mDropAccelRate = 0.1f;
@@ -93,12 +95,10 @@ public class PlayerShipController : MonoBehaviour
 	//For deleting duplicate ships when we change levels ~Adam
 	public int mShipCreationLevel;
 	public bool mToggleFireOn = true;
-	
-	//For tracking where the ship was last frame so we can see how much/in what direction its moving ~Adam
-	//public Vector3 mLastFramePosition;
-	//public Vector3 mLastFrameDifference = Vector3.zero;
-	//movprotected float mLastNonZeroHorizontalDifference;
+
+	//Whether or not the ship is currently drifting towards the bottom of the screen on its own ~Adam
 	protected bool mDriftDown = true;
+	//What direction the ship's been told to move in ~Adam
 	protected float mInputVertical = 0f;
 	protected float mInputHorizontal = 0f;
 
@@ -112,19 +112,15 @@ public class PlayerShipController : MonoBehaviour
 	public GameObject mLaserFist;
 	public bool mHaveBigBlast = false;
 	public GameObject mBigBlast;
-	
-	
-	
+
 	//For making the ship flash when hit ~Adam
 	public GameObject mMainShipHitSprite;
 	public GameObject mSecondShipHitSprite;
-
 
 	//For altering movement and firing speed with damage and repair ~Adam
 	public float mFireUpgrade = 1f;
 	public float mMoveUpgrade = 1f;
 	[SerializeField] protected ScoreManager mScoreMan;
-
 
 	//For flipping the ship in co-op mode ~Adam
 	public float mFlipTimer = 1f;
@@ -138,9 +134,8 @@ public class PlayerShipController : MonoBehaviour
 
 	//For toggling the ability to hover externally ~Adam
 	protected bool mHoverDisabled;
-	[SerializeField] protected float[] mBounds = new float[4];
-
 	//The X and Y bounds of the part of the screen the ship can move on ~Adam
+	[SerializeField] protected float[] mBounds = new float[4];
 
 
 	// Use this for initialization
@@ -159,11 +154,12 @@ public class PlayerShipController : MonoBehaviour
 			mBaseMovementSpeed = 15.0f;
 			transform.localScale = new Vector3(1.5f,1.5f,1.5f);
 		}
-		
+
+		//Ensure that there are no duplicate copies of the player character ship ~Adam
 		mShipCreationLevel = Application.loadedLevel;
 		
 		PlayerShipController[] otherPlayerShips = FindObjectsOfType<PlayerShipController>();
-		//Debug.Log(otherPlayerShip.name);
+
 		foreach(PlayerShipController othership in otherPlayerShips)
 		{
 			if(othership.mShipCreationLevel < this.mShipCreationLevel)
@@ -249,14 +245,14 @@ public class PlayerShipController : MonoBehaviour
 			}
 		}
 		
-		//Spin the ships when hit ~Ada,
+		//Spin the ships when hit ~Adam
 		if(mSpinning != 0f)
 		{
 			SpinControl();
 		}
 		
 
-		//Toggle shield sprites ~Adam
+		#region Toggle shield sprites ~Adam
 		if(mShielded)
 		{
 			mMainShipShieldSprite.GetComponent<Animator>().SetInteger ("ShieldState", 1);
@@ -305,9 +301,10 @@ public class PlayerShipController : MonoBehaviour
 			mSecondShipShieldSprite.GetComponent<Light>().enabled = false;
 			
 		}
+		#endregion
 		
 		//We used to increase movement speed as we progress through levels. ~Adam
-		//The code from that setup is being preserved via commenting in the event that our game design changes back to use that at a later day ~Adam
+		//The code from that setup is being preserved via commenting in the event that our game design changes back to use that at a later date ~Adam
 		if(Time.timeScale > 0f)
 		{
 			//mMovementSpeed = ( mBaseMovementSpeed + (6f/25f*(Application.loadedLevel)) ) /Time.timeScale;
@@ -348,7 +345,7 @@ public class PlayerShipController : MonoBehaviour
 
 
 
-		//Recolor the ship sprite when overheating ~Adam
+		#region Recolor the ship sprite when overheating ~Adam
 		if (isOverheated) 
 		{
 			mToggleFireOn = false;
@@ -366,7 +363,8 @@ public class PlayerShipController : MonoBehaviour
 			mMainShip.GetComponent<Renderer>().material.color = Color.Lerp(mMainShip.GetComponent<Renderer>().material.color,Color.white,0.1f);
 			mSecondShip.GetComponent<Renderer>().material.color = Color.Lerp(mSecondShip.GetComponent<Renderer>().material.color,Color.white,0.1f);
 		}
-		
+		#endregion
+
 		//firing bullets while the fire button is held
 		if (mToggleFireOn) 
 		{
@@ -915,7 +913,7 @@ public class PlayerShipController : MonoBehaviour
 		if(!mPauseMan.isPaused && !mPauseMan.isPrePaused)
 		{
 
-			
+			#region Gamepad Joystick input ~Adam
 			if(mPlayerInputDevice.LeftStick.X > 0.3f || mPlayerInputDevice.LeftStick.X < -0.3f)
 			{
 				mInputHorizontal = mPlayerInputDevice.LeftStick.X;
@@ -924,34 +922,52 @@ public class PlayerShipController : MonoBehaviour
 			{
 				mInputVertical = mPlayerInputDevice.LeftStick.Y;
 			}
+			#endregion
 
-
-			//take in arrow keys if there's no player 2 ~Adam
+			#region take in arrow keys if there's no player 2 ~Adam
 			if(mPlayerTwo == null || !mPlayerTwo.isActiveAndEnabled)
 			{
 				if(Input.GetKey(KeyCode.UpArrow))
+				{
 					mInputVertical = 1;
+				}
 				if(Input.GetKey(KeyCode.LeftArrow))
+				{
 					mInputHorizontal = -1;
+				}
 				if(Input.GetKey(KeyCode.DownArrow))
+				{
 					mInputVertical = -1;
+				}
 				if(Input.GetKey(KeyCode.RightArrow))
+				{
+					mInputHorizontal = 1;
+				}
+			}
+			#endregion
+
+			#region Alternatively, take WASD directional input ~Adam
+			//Doing straight keyboard bindings instead of input.getaxis because of conflicts with two gamepads ~Adam
+			if(Input.GetKey(KeyCode.W))
+			{
+				mInputVertical = 1;
+			}
+			if(Input.GetKey(KeyCode.A))
+			{
+				mInputHorizontal = -1;
+			}
+			if(Input.GetKey(KeyCode.S))
+			{
+				mInputVertical = -1;
+			}
+			if(Input.GetKey(KeyCode.D))
+			{
 					mInputHorizontal = 1;
 			}
-
-			//Doing straight keyboard bindings instead of input.getaxis because of conflicts with two gamepads
-			if(Input.GetKey(KeyCode.W))
-				mInputVertical = 1;
-			if(Input.GetKey(KeyCode.A))
-				mInputHorizontal = -1;
-			if(Input.GetKey(KeyCode.S))
-				mInputVertical = -1;
-			if(Input.GetKey(KeyCode.D))
-					mInputHorizontal = 1;
-
+			#endregion
 			
 			
-			//Gamepad D-Pad input ~Adam
+			#region Gamepad D-Pad input ~Adam
 			if(mPlayerInputDevice.DPadDown.IsPressed)
 			{
 				mInputVertical = -1f;
@@ -968,6 +984,7 @@ public class PlayerShipController : MonoBehaviour
 			{
 				mInputHorizontal = 1f;
 			}
+			#endregion
 		}
 		
 		
@@ -994,13 +1011,11 @@ public class PlayerShipController : MonoBehaviour
 		
 		SetMovementDirection(mInputHorizontal, mInputVertical);
 
-
-
 	}//END of TakeDirectionalInput()
 
 	protected virtual void SetMovementDirection(float horizontal, float vertical)
 	{
-		//Movement input for mouse/touch on mobile
+		#region Movement input for mouse/touch on mobile
 		if(Input.GetMouseButton(0) && (Application.isMobilePlatform)  && Time.timeScale != 0f)
 		{
 			Vector3 screenPos = Camera.main.WorldToScreenPoint(this.transform.position);
@@ -1018,7 +1033,8 @@ public class PlayerShipController : MonoBehaviour
 			{
 				mDriftDown = true;
 			}
-			
+
+			//Android code written by Mateusz
 			#if UNITY_ANDROID
 			mMoveDir = Vector3.Lerp(mMoveDir, new Vector3(translationDirection.x, translationDirection.y, 0f) * 2f * mMovementSpeed * Time.deltaTime, 0.5f);
 			#else
@@ -1026,9 +1042,9 @@ public class PlayerShipController : MonoBehaviour
 			#endif
 			
 		}
+		#endregion
 		
-		
-		//Set the Movement Direction when not on mobile ~Adam
+		#region Set the Movement Direction when not on mobile ~Adam
 		else if (horizontal != 0.0f || vertical != 0.0f && Time.timeScale != 0f)
 		{
 			
@@ -1074,19 +1090,12 @@ public class PlayerShipController : MonoBehaviour
 				mMoveDir = Vector3.Lerp(mMoveDir, Vector3.Normalize(new Vector3(-1f,-1f,0))*2f*mMovementSpeed * Time.deltaTime, 0.08f);
 			}
 		}
+		#endregion
 	}//END of SetMovementDirection()
 
 	protected virtual void TakeFiringInput()
 	{
-		//Keyboard and mouse input and InControl Gamepad input ~Adam
-		//Fire used to be via toggle ~Adam
-//		if(mPlayerInputDevice.Action1.WasPressed || mPlayerInputDevice.Action4.WasPressed || Input.GetButtonDown("FireGun"))
-//		{
-//			Debug.Log("InControl button pressed");
-//			ToggleFire();
-//		}
-		
-		//Firing via hold-to-fire ~Adam
+		#region Firing via hold-to-fire ~Adam
 		if(mPlayerInputDevice.Action1.IsPressed || mPlayerInputDevice.Action4.IsPressed || Input.GetButton("FireGun"))
 		{
 			mToggleFireOn = true;
@@ -1095,10 +1104,11 @@ public class PlayerShipController : MonoBehaviour
 		{
 			mToggleFireOn = false;
 		}
-		//Fire held super weapon ~Adam
+		#endregion
+		#region Fire held super weapon ~Adam
 		//Can hold multiple super weapons.  They fire in a priority order: Laser Fist, then Big Blast ~Adam
 		//Have to wait for one to finish firing before firing another ~Adam
-		if( (mPlayerInputDevice.RightTrigger.WasPressed || Input.GetButtonDown("FireSuperGun")) && !mBigBlast.activeSelf && !mLaserFist.activeSelf)
+		if( (mPlayerInputDevice.Action2.WasPressed || Input.GetButtonDown("FireSuperGun")) && !mBigBlast.activeSelf && !mLaserFist.activeSelf)
 		{
 			//Prevent from firing while the "Get Ready" message is up ~Adam
 			if(FindObjectOfType<GetReady>() == null)
@@ -1126,41 +1136,57 @@ public class PlayerShipController : MonoBehaviour
 				}
 			}
 		}
+		#endregion
 	}//END of TakeFiringInput()
 
 	//Thruster control for hovering ~Adam
 	protected virtual void TakeThrusterInput()
 	{
-		if ( (mPlayerInputDevice.Action2.IsPressed || mPlayerInputDevice.Action3.IsPressed || Input.GetButton ("Thrusters")) && !mHoverDisabled) {
+		if ( (mPlayerInputDevice.RightTrigger.IsPressed || Input.GetButton ("Thrusters")) && !mHoverDisabled) {
 			//Slow down movement while hovering~Adam
 			mMoveDir *= 0.95f;
 
 			isHovering = true;
 			
 			mDropSpeed -= mDropDeccelRate * 3f;
-			if (mDropSpeed <= 0.01f) {
+			if (mDropSpeed <= 0.01f) 
+			{
 				mDropSpeed = 0.00f;
 			}
-			
-			if (mMoveDir.y < -0.2f) {
-				foreach (ParticleSystem shipTrail in this.GetComponentsInChildren<ParticleSystem>()) {
-					if (shipTrail.gameObject != mDamageParticles) {
+
+			//Turn off ship thruster particles if moving downward ~Adam
+			if (mMoveDir.y < -0.2f) 
+			{
+				foreach (ParticleSystem shipTrail in this.GetComponentsInChildren<ParticleSystem>()) 
+				{
+					if (shipTrail.gameObject != mDamageParticles) 
+					{
 						shipTrail.enableEmission = false;
 					}
 				}
-			} else {
-				foreach (ParticleSystem shipTrail in this.GetComponentsInChildren<ParticleSystem>()) {
-					if (shipTrail.gameObject != mDamageParticles) {
-						if (!(mShipRecovered && !secondShipOnHip)) {
+			}
+			//Turn on ship thruster particles if hovering or moving up ~Adam
+			else 
+			{
+				foreach (ParticleSystem shipTrail in this.GetComponentsInChildren<ParticleSystem>()) 
+				{
+					if (shipTrail.gameObject != mDamageParticles) 
+					{
+						if (!(mShipRecovered && !secondShipOnHip)) 
+						{
 							shipTrail.enableEmission = true;
-						} else {
+						}
+						//Don't do the thruster particles if the double-ship is back-to-back with the main ship, otherwise the particles will cover the ship graphics ~Adam
+						else 
+						{
 							shipTrail.enableEmission = false;
 						}
 					}
 				}
 			}
-		} else {
-
+		}
+		else
+		{
 			isHovering = false;
 		}
 		
@@ -1187,10 +1213,10 @@ public class PlayerShipController : MonoBehaviour
 			break;
 		}
 	}
+
 	public virtual void Respawn()
 	{
 		mPlayerInputDevice = null;
-//		mPlayerInputMeta = "";
 		ManageInputDevice();
 	}
 	#endregion

@@ -1,32 +1,37 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//This is the script that controls the formations that the enemies fly in.  ~Adam
+//It gets attached to an otherwise empty game object with a number of child game objects that all have the SwarmGridSlot script attached to them ~Adam
+//The child SwarmGridSlots can be freely moved around in the Unity Editor environment so that anyone can design an enemy formation and then save it as a prefab without needing to know how the code behind it works. ~Adam
+
 public class SwarmGrid : MonoBehaviour 
 {
-	//An array of all the GridSlot game object that this is going to have as children
+	//An array of all the GridSlot game object that this is going to have as children ~Adam
 	public SwarmGridSlot[] mGridSlots;
 	
-	//The spot that the grid's hub moves around
+	//The spot that the grid's hub moves around ~Adam
 	[SerializeField] private bool mOverrideFocusPoint = false;
 	[SerializeField] private Vector3 mFocusPoint = new Vector3	(0f,0f,-2f);
 
-	//How fast the swarm grid moves
+	//How fast the swarm grid moves ~Adam
 	[SerializeField] private float mGridMoveSpeed = 3f;
 
-	//Variables for moving the swarm up and down
+	//Variables for moving the swarm up and down ~Adam
 	[SerializeField] private bool mMoveVeritcal = false;
 	[SerializeField] private float mVerticalMoveDist = 5f;
 	[SerializeField] private bool mMovingUp = false;
 
-	//Variables for moving the swarm left and right
+	//Variables for moving the swarm left and right ~Adam
 	[SerializeField] private bool mMoveHorizontal = false;
 	[SerializeField] private float mHorizontaMoveDist = 5f;
 	[SerializeField] private bool mMovingRight = false;
 
-	//The direction the grid is going to be moving for circluar movement
+	//The direction the grid is going to be moving for circluar movement ~Adam
 	[SerializeField] private bool mMoveCirclular = true;
 	[SerializeField] private Vector3 mGridMoveDirection = new Vector3(5, 1, 0);
 
+	//For switching between formation shapes ~Adam
 	[SerializeField] private bool mUseMultipleFormations = false;
 	[SerializeField] private float mFormationSwitchTimeDefault = 10f;
 	[SerializeField] private float mFormationSwitchTime;
@@ -53,7 +58,7 @@ public class SwarmGrid : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		//Moving Up and Down
+		//Moving Up and Down ~Adam
 		if(mMoveVeritcal)
 		{
 			if (transform.position.y >= mFocusPoint.y+mVerticalMoveDist)
@@ -74,7 +79,7 @@ public class SwarmGrid : MonoBehaviour
 			}
 		}
 
-		//Moving Left and Right
+		//Moving Left and Right ~Adam
 		if(mMoveHorizontal)
 		{
 			if (transform.position.x >= mFocusPoint.x+mHorizontaMoveDist)
@@ -95,7 +100,7 @@ public class SwarmGrid : MonoBehaviour
 			}
 		}
 
-		//Moving around in a circle
+		//Moving around in a circle ~Adam
 		if(mMoveCirclular)
 		{
 			mGridMoveDirection += mFocusPoint - transform.position;
@@ -105,6 +110,8 @@ public class SwarmGrid : MonoBehaviour
 			transform.position += (mGridMoveDirection * Time.deltaTime);
 		}
 
+		//Swap between formation shapes on a timer by referencing inactive SwarmGrids in the scene ~Adam
+		//These other SwarmGrids are set in-editor rather than at runtime ~Adam
 		if(mUseMultipleFormations && mFormationUsed >= 0)
 		{
 			if(!mLimitedFormationSwitches || mMaxFormationSwitches > mFormationSwitchCount)
@@ -131,16 +138,16 @@ public class SwarmGrid : MonoBehaviour
 	}//END of Update()
 
 
-	//Finding the next empty position in the grid
+	//Finding the next empty position in the grid to assign it to a newly spawned enemy ~Adam
 	public GameObject GetGridPosition(EnemyShipAI searchingShip)
 	{
-		//Set to -1 to show that we haven't found a GridSlot yet
+		//Set to -1 to show that we haven't found a GridSlot yet ~Adam
 		int gridPosition = -1;
 
-		//Loop through mGridSlots until you find an empty one
+		//Loop through mGridSlots until you find an empty one ~Adam
 		for (int i = 0; i < mGridSlots.Length; i++)
 		{
-			//if we find an open GridSlot, set is occupied status to true and make that the gridPosition that we return
+			//if we find an open GridSlot, set is occupied status to true and make that the gridPosition that we return ~Adam
 			if (mGridSlots[i] != null && !mGridSlots[i].mOccupied)
 			{
 				gridPosition = i;
@@ -149,12 +156,12 @@ public class SwarmGrid : MonoBehaviour
 			}
 		}
 
-		//Return a gridPosition if there was a slot open
+		//Return a gridPosition if there was a slot open ~Adam
 		if (gridPosition >= 0)
 		{
 			return mGridSlots[gridPosition].gameObject;
 		}
-		//Return null if there are no empty slots (Hopefully this won't break things)
+		//Return null if there are no empty slots ~Adam
 		else
 		{
 			return null;
@@ -162,7 +169,7 @@ public class SwarmGrid : MonoBehaviour
 
 	}//END of GetGridPosition()
 
-	//For checking if the swarm grid is full
+	//For checking if the swarm grid is full to avoid spawning excess enemies ~Adam
 	public bool CheckIfSwarmFull()
 	{
 		bool swarmFull = true;
@@ -179,14 +186,14 @@ public class SwarmGrid : MonoBehaviour
 		return swarmFull;
 	}
 
-	//For Changing the shape of the Swarm's formation
+	//For Changing the shape of the Swarm's formation ~Adam
+	//Works best when the reference formation has the samw number of SwarmGridSlots as this formation ~Adam
 	public void ChangeFormation(int formationNumber)
 	{
 		for (int i = 0; i < mAlternateFormations[formationNumber].mGridSlots.Length; i++)
 		{
 			if (mGridSlots[i] != null && mAlternateFormations[formationNumber].mGridSlots[i] != null)
 			{
-				//Debug.Log(mGridSlots[i].transform.localPosition + " "+ mAlternateFormations[formationNumber].mGridSlots[i].transform.localPosition);
 				mGridSlots[i].mFormationPosition = mAlternateFormations[formationNumber].mGridSlots[i].transform;
 			}
 		}
@@ -200,6 +207,7 @@ public class SwarmGrid : MonoBehaviour
 		return mFormationUsed;
 	}//END of GetFormationNumber()
 
+	//Check if this swarm has no enemies assigned to it.  This way we can trigger events on particular swarms in the scene being cleared out rather than just checking if ALL enemies are gone ~Adam
 	public bool CheckIfSwarmEmpty()
 	{
 		bool swarmEmpty = true;
@@ -211,5 +219,5 @@ public class SwarmGrid : MonoBehaviour
 			}
 		}
 		return swarmEmpty;
-	}
+	}//END of CheckIfSwarmEmpty()
 }

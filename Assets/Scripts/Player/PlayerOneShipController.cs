@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using InControl;
 using XInputDotNetPure; // Required in C#
 
+//This is the script that is actually attached to the player 1 Ship object in-game ~Adam
 
 public class PlayerOneShipController : PlayerShipController 
 {

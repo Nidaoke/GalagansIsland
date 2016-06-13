@@ -146,8 +146,6 @@ public class EnemyShipAI : MonoBehaviour
 	{
 		mMovementTransform = transform.up;
 
-
-
 		GetComponent<Animator> ().logWarnings = false;
 
 		if (mLimitedAutoFire) 
@@ -182,8 +180,8 @@ public class EnemyShipAI : MonoBehaviour
 		mScoreManager = FindObjectOfType<ScoreManager>();
 		mKillCounter = FindObjectOfType<LevelKillCounter>();
 
-		//Find out where in the swarm grid this ship will be going (the next unoccupied slot)
-		//mSwarmGrid is assigned by the enemy spawner
+		//Find out where in the swarm grid this ship will be going (the next unoccupied slot) ~Adam
+		//mSwarmGrid is assigned by the enemy spawner ~Adam
 		mSwarmGridPosition = mSwarmGrid.GetGridPosition(this);
 
 		//Set timers to their default values
@@ -197,10 +195,10 @@ public class EnemyShipAI : MonoBehaviour
 		mDefaultSpeed = mSpeed;
 		mSpeed = mFormSpeed;
 
-		//Scale up for mobile screen ~Adam
+		//Scale up for mobile screen  ~Adam
 		if(Application.isMobilePlatform)
 		{
-			//transform.localScale = new Vector3(1.75f,1.75f,1.75f);
+			transform.localScale = new Vector3(1.75f,1.75f,1.75f);
 		}
 	}//END of Start()
 	
@@ -218,7 +216,7 @@ public class EnemyShipAI : MonoBehaviour
 			}
 		}
 
-		//Also kill the ship FINALLY!!! ~ Jonathan
+		#region Fake collision detection with the secondary ship when the player has a double-ship upgrade ~ Jonathan
 		if(mPlayer.GetComponent<PlayerOneShipController> ()!= null)
 		{
 			if (mPlayer.GetComponent<PlayerShipController> ().mShipRecovered) 
@@ -232,6 +230,8 @@ public class EnemyShipAI : MonoBehaviour
 				}
 			}
 		}
+		#endregion
+
 		if(mScoreManager == null)
 		{
 			mScoreManager = FindObjectOfType<ScoreManager>();
@@ -278,7 +278,7 @@ public class EnemyShipAI : MonoBehaviour
 			}
 		}
 
-		#region This segment was already written when I joined.  Although I did update the variable and enum names for legibility and consistency.
+		#region This segment was already written when I joined the project.  Although I did update the variable and enum names for legibility and consistency. ~Adam
 		//Decrement the state switch timer
 		mSwitchCoolDown -= Time.deltaTime;
 
@@ -427,7 +427,7 @@ public class EnemyShipAI : MonoBehaviour
 		}
 
 
-		#region Basic enemy movement was already written when I joined the project.  My main edit to this region was to make timers variable-based rather than hard-coded in order to allow variations between enemy types.
+		#region Basic enemy movement was already written when I joined the project.  My main edit to this region was to make timers variable-based rather than hard-coded in order to allow variations between enemy types. ~Adam
 		//Variables for the direciton and distance this unit has to go to reach its SwarmGridSlot
 		Vector3 toSwarm = new Vector3();
 		float dist;
@@ -499,7 +499,7 @@ public class EnemyShipAI : MonoBehaviour
 	//Tells this unit to fly in a circle
 	void DoFlightLoop()
 	{
-		#region Basic enemy movement was already written when I joined the project.  My main edit to this region was to make movement speed, circle-tightness, and timers variable-based rather than hard-coded in order to allow variations between enemy types.
+		#region Basic enemy movement was already written when I joined the project.  My main edit to this region was to make movement speed, circle-tightness, and timers variable-based rather than hard-coded in order to allow variations between enemy types. ~Adam
 		Vector3 moveRightVector = Quaternion.Euler(0,0,-90)*mMovementTransform;
 
 		//Set up the directional angle to fly in a circle
@@ -527,7 +527,7 @@ public class EnemyShipAI : MonoBehaviour
 		#endregion
 	}//END of DoFlightLoop()
 
-	//The behavior for moving around on top if this unit's swarm grid slot
+	//The behavior for moving around on top if this unit's swarm grid slot ~Adam
 	void Swarm()
 	{
 		//Animation Control ~Adam
@@ -549,7 +549,7 @@ public class EnemyShipAI : MonoBehaviour
 			mSpeed = mDefaultSpeed;
 		}
 
-		#region Basic enemy movement was already written by Jonathan when I joined the project.  
+		#region Basic enemy movement was already written by Jonathan when I joined the project.  ~Adam
 		//Count down to get ready to attack
 		mAttackFrequencyTimer -= Time.deltaTime;
 		
@@ -633,16 +633,14 @@ public class EnemyShipAI : MonoBehaviour
 		
 		#endregion
 
-		#region Basic enemy movement was already written by Jonathan when I joined the project.  Before I joined, enemies would move toward the player for a few seconds, then move back to the swarm without actually affecting the player.
 
-
+		#region set the movement velocity of the enemy ~Jonathan
 		Vector3 vel = transform.gameObject.GetComponent<Rigidbody>().velocity;
 		
 		vel += toPlayer;
 		vel.Normalize();
 		vel *= mSpeed;
 
-		
 		transform.gameObject.GetComponent<Rigidbody>().velocity = vel;
 		#endregion
 
@@ -657,9 +655,9 @@ public class EnemyShipAI : MonoBehaviour
 			GetComponentInChildren<Renderer>().material.color = Color.white;
 		}
 
-		//Return to the swarm, possibly stopping to fly in a loop along the way
-		//Triggers either once the enemy has been attacking for its full attack time, or if the player is sent into their tempory invulnerable state after being hit
-		//Grabbers will still go after invincible players if they are still capable of stealing a ship
+		//Return to the swarm, possibly stopping to fly in a loop along the way ~Adam
+		//Triggers either once the enemy has been attacking for its full attack time, or if the player is sent into their tempory invulnerable state after being hit ~Adam
+		//Grabbers will still go after invincible players if they are still capable of stealing a ship ~Adam
 		if (mSwitchCoolDown <= 0.0f || (mScoreManager.GetComponent<ScoreManager>().mPlayerSafeTime > 0 ) )
 		{
 			if( !mGrabber 
@@ -699,12 +697,14 @@ public class EnemyShipAI : MonoBehaviour
 	}//END of AttackPlayer()
 
 
+	//The main bullet that the enemy shoots ~Adam
 	public void ShootEnemyBullet()
 	{
 		GameObject enemyBullet;
 		enemyBullet = Instantiate(mEnemyBullet, transform.position, Quaternion.identity) as GameObject;
 	}//END of ShootEnemyBullet()
 
+	//For shooting the bullet that some enemies fire upon dying ~Adam
 	public void ShootSecondaryEnemyBullet()
 	{
 		if(mSecondaryBullet != null)
@@ -712,7 +712,7 @@ public class EnemyShipAI : MonoBehaviour
 			GameObject enemyBullet;
 			enemyBullet = Instantiate(mSecondaryBullet, transform.position, Quaternion.identity) as GameObject;
 		}
-	}//END of ShootEnemyBullet()
+	}//END of ShootSecondaryEnemyBullet()
 
 	//Gets called externally for having enemies in a formations fire in a fixed pattern ~Adam
 	public void ShootPatternBullet(float bulletAngle)
@@ -762,6 +762,7 @@ public class EnemyShipAI : MonoBehaviour
 
 				Destroy(other.gameObject);
 			}
+			//Make bullets bounce off if the enemy has an invincibility shield (mostly for the grabber enemies) ~Adam
 			else
 			{
 				if(Random.value < 0.5)

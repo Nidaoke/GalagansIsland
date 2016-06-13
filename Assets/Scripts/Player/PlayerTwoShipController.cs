@@ -5,13 +5,11 @@ using InControl;
 using XInputDotNetPure; // Required in C#
 using Assets.Scripts.Achievements;
 
+//This is the script that is actually attached to the player 2 Ship object in-game ~Adam
 
 public class PlayerTwoShipController : PlayerShipController 
 {
-	
 
-
-	
 	// Use this for initialization
 	protected override void Start () 
 	{
@@ -20,12 +18,9 @@ public class PlayerTwoShipController : PlayerShipController
 		{
 			mScoreMan = FindObjectOfType<ScoreManager>();
 			mPauseMan = mScoreMan.gameObject.GetComponent<PauseManager>();
-
 		}
 
 
-		//transform.localScale = new Vector3 (1.75f, 1.75f, 1.75f);
-		
 		//Adjust speed and scale for mobile ~Adam
 		if (Application.isMobilePlatform)
 		{
@@ -36,7 +31,7 @@ public class PlayerTwoShipController : PlayerShipController
 		mShipCreationLevel = Application.loadedLevel;
 		
 		PlayerTwoShipController[] otherPlayerShips = FindObjectsOfType<PlayerTwoShipController>();
-		//Debug.Log(otherPlayerShip.name);
+
 		foreach(PlayerTwoShipController othership in otherPlayerShips)
 		{
 			if(othership.mShipCreationLevel < this.mShipCreationLevel)
@@ -80,15 +75,8 @@ public class PlayerTwoShipController : PlayerShipController
 				mPlayerOne = FindObjectOfType<PlayerOneShipController>();
 			}
 		}
-//		//Enable pausing if player one is dead ~Adam
-//		if(mPlayerOne == null || !mPlayerOne.gameObject.activeInHierarchy)
-//		{
-//			GetComponent<PauseManager>().enabled = true;
-//		}
-//		else
-//		{
-//			GetComponent<PauseManager>().enabled = false;
-//		}
+
+
 		base.Update();
 		
 
@@ -151,7 +139,7 @@ public class PlayerTwoShipController : PlayerShipController
 
 	
 	
-		#region breaking down parts of the Update() function for parts that will be different between Player1 and Player2
+	#region breaking down parts of the Update() function for parts that will be different between Player1 and Player2
 	//managing input devices on co-op mode ~Adam
 	protected override void ManageInputDevice()
 	{
@@ -195,20 +183,30 @@ public class PlayerTwoShipController : PlayerShipController
 		mInputHorizontal = 0f;
 		mInputVertical = 0f;
 		
-		//If statement for avoiding getting NaN returns when paused
+		//If statement for avoiding getting NaN returns when paused ~Adam
 		if( FindObjectOfType<PauseManager>() == null || (FindObjectOfType<PauseManager>() != null && !FindObjectOfType<PauseManager>().isPaused && !FindObjectOfType<PauseManager>().isPrePaused) )
 		{
 
-			
+			#region Keyboard input ~Adam
 			if(Input.GetKey(KeyCode.UpArrow))
+			{
 				mInputVertical = 1;
+			}
 			if(Input.GetKey(KeyCode.LeftArrow))
+			{
 				mInputHorizontal = -1;
+			}
 			if(Input.GetKey(KeyCode.DownArrow))
+			{
 				mInputVertical = -1;
+			}
 			if(Input.GetKey(KeyCode.RightArrow))
+			{
 				mInputHorizontal = 1;
-			
+			}
+			#endregion
+
+			#region Gamepad joystick input ~Adam
 			if(mPlayerInputDevice.LeftStick.X > 0.3f || mPlayerInputDevice.LeftStick.X < -0.3f)
 			{
 				mInputHorizontal = mPlayerInputDevice.LeftStick.X;
@@ -217,6 +215,9 @@ public class PlayerTwoShipController : PlayerShipController
 			{
 				mInputVertical = mPlayerInputDevice.LeftStick.Y;
 			}
+			#endregion
+
+			#region Gamepad DPad input ~Adam
 			if(InputManager.Devices.Count > 1)
 			{
 				
@@ -237,6 +238,7 @@ public class PlayerTwoShipController : PlayerShipController
 					mInputHorizontal = 1f;
 				}
 			}
+			#endregion
 		}
 		mMainShipAnimator.SetInteger("Direction", Mathf.RoundToInt(mInputHorizontal));
 		mSecondShipAnimator.SetInteger("Direction", Mathf.RoundToInt(mInputHorizontal));
@@ -250,7 +252,7 @@ public class PlayerTwoShipController : PlayerShipController
 		
 		
 
-		//Keyboard Movement Controls
+		//Keyboard Movement Controls ~Adam
 		//For making the ship drift down when not trying to go up
 		if(mInputVertical > 0f)
 		{
@@ -281,7 +283,7 @@ public class PlayerTwoShipController : PlayerShipController
 				mDriftDown = true;
 			}
 
-
+			//Android code by Mateusz
 			#if UNITY_ANDROID
 			mMoveDir = Vector3.Lerp(mMoveDir, new Vector3(translationDirection.x, translationDirection.y, 0f) * 2f * mMovementSpeed * Time.deltaTime, 0.5f);
 			#else
@@ -306,13 +308,6 @@ public class PlayerTwoShipController : PlayerShipController
 
 	protected override void TakeFiringInput()
 	{
-		//Keyboard and mouse input and InControl Gamepad input ~Adam
-		//Firing via toggle ~Adam
-//		if( Input.GetButtonDown("FireGunP2") || (InputManager.Devices.Count >1 && (mPlayerInputDevice.Action1.WasPressed || mPlayerInputDevice.Action4.WasPressed) ) )
-//		{
-//			Debug.Log("InControl button pressed");
-//			ToggleFire();
-//		}
 		
 		//Firing via hold-to-fire ~Adam
 		if( Input.GetButton("FireGunP2") || (InputManager.Devices.Count >1 && (mPlayerInputDevice.Action1.IsPressed || mPlayerInputDevice.Action4.IsPressed) ) )
@@ -328,7 +323,7 @@ public class PlayerTwoShipController : PlayerShipController
 		//Fire held super weapon ~Adam
 		//Can hold multiple super weapons.  They fire in a priority order: Big Blast, then Laser Fist ~Adam
 		//Have to wait for one to finish firing before firing another ~Adam
-		if( ( (InputManager.Devices.Count >1 && mPlayerInputDevice.RightTrigger.WasPressed) || Input.GetButtonDown("FireSuperGunP2")) && !mBigBlast.activeSelf && !mLaserFist.activeSelf)
+		if( ( (InputManager.Devices.Count >1 && mPlayerInputDevice.Action2.WasPressed) || Input.GetButtonDown("FireSuperGunP2")) && !mBigBlast.activeSelf && !mLaserFist.activeSelf)
 		{
 			
 			if(mHaveLaserFist)
@@ -347,7 +342,7 @@ public class PlayerTwoShipController : PlayerShipController
 	//Thruster control for hovering ~Adam
 	protected override void TakeThrusterInput()
 	{
-		if( !mHoverDisabled && (InputManager.Devices.Count >1 && (mPlayerInputDevice.Action2.IsPressed || mPlayerInputDevice.Action3.IsPressed) ) || Input.GetButton("ThrustersP2"))
+		if( !mHoverDisabled && (InputManager.Devices.Count >1 && mPlayerInputDevice.RightTrigger.IsPressed ) || Input.GetButton("ThrustersP2"))
 		{
 			//Slow down movement while hovering~Adam
 			mMoveDir *= 0.95f;
